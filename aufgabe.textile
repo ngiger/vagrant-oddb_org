@@ -1,0 +1,25 @@
+Um oddb.org aufzusetzen benötigst Du zuerst Funtoo (vom Gentoo-Gründer Daniel Robbins):
+ 
+* http://www.funtoo.org/wiki/Funtoo_Linux_Installation
+ 
+Danach solltest Du die folgenden 6 Schritte ausführen (gems sind im Text-file, Schritt 5 startet ODDB auf):
+ 
+* http://dev.ywesee.com/Choddb/SetupOddborg#StartHere
+ 
+nachdem Du den Schritt 5 ausgeführt hast wirst Du in der Console ein paar Errors erhalten. Ab dort beginnt die Dokumentation vom Setup von Michal und Andris. Beide haben an den beiden Tagen dasselbe gemacht.
+ 
+* http://dev.ywesee.com/Michal/Index (unten mit Lesen beginnen, da er immer neue oben ins File geschreiben hat)
+
+* http://dev.ywesee.com/Andris/Index
+ 
+Es wäre gut, wenn Du Dein Setup (inklusive den erhaltenen Errors) ebenfalls in einem Wiki loggen würdest, damit ich nachvollziehen kann wo Du mit dem Setup stehst.
+ 
+Auf dieser "Seite":http://dev.ywesee.com/Choddb/SetupOddborg
+ 
+findest Du die Vorgehensweisen von Michal und Andris (und weiterführende Links von mir), welche oddb.org innerhalb von 2 Tage aufgesetzt haben bei mir im Büro.
+ 
+Noch etwas: Um den Einstieg in unser Framework zu erleichtern kann es Sinn machen, auch mal dieses Mock-Projekt anzuschauen. Dort werden alle Libraries (sbsm, htmlgrid, odba) welche wir selber geschrieben haben und welche wir verwenden, aufgelistet und zusammen verwendet.
+ 
+*https://github.com/zdavatz/shoe
+ 
+Bei Fragen stehe ich Dir gerne jederzeit zur Verfügung

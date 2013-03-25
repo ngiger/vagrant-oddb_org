@@ -1,0 +1,50 @@
+h1. Eays setup to ODDB.org
+
+Goal: "Setup":http://dev.ywesee.com/Choddb/SetupOddborg#StartHere of oddb.org should be easy and automatated.
+
+Benutze Ruby 1.9.2p320 (ich wusste, dass damit gentoo läuft)
+
+bc. git clone git://github.com/ngiger/vagrant-oddb_org.git
+git clone git://github.com/jedi4ever/veewee.git
+cd veewee
+bundle install
+vagrant basebox define funtoo-latest-x86_64 funtoo-latest-x86_64
+# lokale Modifikationen von mir in definitions/funtoo-latest-x86_64
+# damit es hochkommt
+vagrant basebox build funtoo-latest-x86_64
+# Das dauert ca 35 Minuten mit 4 CPU & 4 GB lange. Kompiliert 3.8.4-gentoo for x86_64
+vagrant basebox export funtoo-latest-x86_64
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 7222 -l root 127.0.0.1 # Zum Testen ob alles gut lief
+vagrant box add funtoo-latest-x86_64 funtoo-latest-x86_64.box
+cd ..
+vagrant init funtoo-latest-latest-x86_64
+vagrant up
+vagrant ssh
+
+h2. Vagrant setup
+
+I will create a puppet forge module ngiger/oddb_org to place everything. I will use the "puppet-librarian":https://github.com/rodjek/librarian-puppet to combine the needed foreign puppet-modules and my own own one.
+
+
+h1. Discussion
+
+h2. Use of Veewee
+
+"Veewee":https://github.com/jedi4ever/veewee makes installing a complete Linux distribution easy.
+
+The goal is to have a minimal server system, which you can afterwards customize using "puppet":http://docs.puppetlabs.com/puppet/ or chef.
+
+Veewee has two different templates for funtoo. I choose funtoo-latest-x86_64 as it was simpler to bring up (but I lost an hour till a switch using a different iso image and most of the @definition.rb@ of @funtoo-latest-generic_64-stable@. It has only two simple ruby script which configure the whole system. As long as one can start with it, I just don't want to tinker with it.
+
+The funtoo templates are not current. But I found a preconfigured "Vagrant boxes":http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box
+
+h2. Use of Vagrant
+
+Vagrant is the glue to create definitions for puppet on you development machine and run them easily on a virtualbox VM.
+
+To keep things simple, I use a single fix hostname @oddb_dev@. I use puppet > 3.0 as it makes things a lot more scalabe and easier to configure than 2.7.
+
+
+
+
+Differences between
