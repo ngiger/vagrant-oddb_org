@@ -14,6 +14,7 @@ Vagrant::Config.run do |config|
   config.vm.customize do |vm|
     vm.memory_size  = 2048 # MB
   end
+  
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"
 #    puppet.manifest_file = "minimal.pp"
@@ -31,5 +32,7 @@ Vagrant::Config.run do |config|
     thisbox.vm.box     = "oddb.or.devel"
     thisbox.vm.box_url = boxUrl
     thisbox.vm.forward_port   22, 22022    # ssh
+    thisbox.vm.forward_port   80, 22080    # apache
   end
-  end
+  
+end

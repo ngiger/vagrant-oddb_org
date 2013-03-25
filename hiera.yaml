@@ -12,7 +12,7 @@
   - yaml
   - gpg
 :yaml:
-  :datadir: /tmp/vagrant-hiera/hieradata
+  :datadir: /etc/puppet
 :hierarchy:
   - private/%{::environment}
 # we use here hostname as we don't have a valid clientcert  
@@ -21,8 +21,8 @@
   - hieradata/common
 :logger: console
 :gpg:
-   :datadir: /tmp/vagrant-hiera/hieradata
+   :datadir: /etc/puppet/data
    # Optional, defaults to ~/.gnupg
-   :key_dir: /tmp/vagrant-hiera/gpg
-
+   :key_dir: /etc/puppet/gpg
+   # :key_dir: /home/niklaus/.gnupg
 

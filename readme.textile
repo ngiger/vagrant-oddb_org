@@ -2,6 +2,55 @@ h1. Eays setup to ODDB.org
 
 Goal: "Setup":http://dev.ywesee.com/Choddb/SetupOddborg#StartHere of oddb.org should be easy and automatated.
 
+As creating funtoo using veewee failed. I downloaded and used then preconfigured "Vagrant box":http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box
+
+After a @vagrant up@ I remarked, that it was not fully vagrant compatible. Therefore I used the following commands from @funtoo-latest-x86_64/postinstall.sh@ to import all
+
+bc. emerge app-emulation/virtualbox-guest-additions
+# we need this as gentoo doesn't do it on its own
+groupadd -r vboxsf
+mkdir /media && chgrp vboxsf /media
+rc-update add virtualbox-guest-additions default
+
+Then after a reboot vagrant still says, that the virtualbox additions are not installed. As I have no time to follow the "instructions for Virtualbox_Guest":http://en.gentoo-wiki.com/wiki/Virtualbox_Guest.
+
+This means that the command on my dev machine @vagrant provision@ does not work.
+I decided to run puppet directly on the VM. To achieve this the following cmds were run:
+
+@sudo mv /etc/puppet /etc/puppet.orig@
+@sudo checkout git://github.com/ngiger/vagrant-oddb_org.git /etc/puppet@
+
+Now I want to be able to run puppet manifests as root with puppet 3.1 and ruby 1.9.2 as default. 
+
+@sudo -i rvm --default ruby-1.9.2-p290@
+@sudo -i rvm get stable@
+
+Then modified /etc/profile.env to get rid of RUBYOPTS with -rauto_gem. I use rvm.
+
+@sudo -i gem install bundler@
+@sudo -iH bundle install --gemfile /etc/puppet/Gemfile@
+
+The command above only completed after uncommented the "@ruby-libvirt@" gem in the Gemfile.
+
+Now my first (very simple) notify.pp manifest worked correctly as shown below:
+
+bc. vagrant@localhost ~ $ cat /etc/puppet/manifests/notify.pp
+notify { "site.pp": }
+vagrant@localhost ~ $ sudo puppet apply /etc/puppet/manifests/notify.pp
+warning: Could not retrieve fact fqdn
+notice: site.pp
+notice: /Stage[main]//Notify[site.pp]/message: defined 'message' as 'site.pp'
+notice: Finished catalog run in 0.01 seconds
+ 
+Next step is to make hiera work.
+
+bc. sudo -i hiera xx
+Failed to start Hiera: RuntimeError: Config file /etc/hiera.yaml not found
+
+Copied my .ssh/keys to be able to push into my github projec.
+
+
+
 Benutze Ruby 1.9.2p320 (ich wusste, dass damit gentoo läuft)
 
 bc. git clone git://github.com/ngiger/vagrant-oddb_org.git
