@@ -25,7 +25,7 @@ Now I want to be able to run puppet manifests as root with puppet 3.1 and ruby 1
 @sudo -i rvm --default ruby-1.9.2-p290@
 @sudo -i rvm get stable@
 
-Then modified /etc/profile.env to get rid of RUBYOPTS with -rauto_gem. I use rvm.
+Then modified /etc/env.d/10rubygems to get rid of RUBYOPTS with -rauto_gem. I use rvm.
 
 @sudo -i gem install bundler@
 @sudo -iH bundle install --gemfile /etc/puppet/Gemfile@
@@ -46,10 +46,72 @@ Next step is to make hiera work.
 
 bc. sudo -i hiera xx
 Failed to start Hiera: RuntimeError: Config file /etc/hiera.yaml not found
+vagrant@localhost /etc/puppet $ sudo ln -s /etc/puppet/hiera.yaml  /etc/
+vagrant@localhost /etc/puppet $ hiera --debug xxx
+DEBUG: 2013-03-25 14:27:34 -0700: Hiera YAML backend starting
+DEBUG: 2013-03-25 14:27:34 -0700: Looking up xxx in YAML backend
+DEBUG: 2013-03-25 14:27:34 -0700: Looking for data source private/config
+DEBUG: 2013-03-25 14:27:34 -0700: Cannot find datafile /etc/puppet/private/config.yaml, skipping
+DEBUG: 2013-03-25 14:27:34 -0700: Looking for data source hieradata/common
+DEBUG: 2013-03-25 14:27:34 -0700: Found xxx in hieradata/common
+Default config value for variable xxx
+date is Mon Mar 25 14:28:12 PDT 2013
 
-Copied my .ssh/keys to be able to push into my github projec.
+Copied my .ssh/keys to be able to push into my github project. date and ssh-add don't work correctly neither!
+Pushed work to github. (commit "hiera works now correctly")
+
+Create a sshfs to exchange my files.
+@/usr/bin/sshfs -p 22022 -o reconnect -o follow_symlinks vagrant@localhost:/ /mnt/oddb_org@
 
 
+h2. Following the script
+
+References /var/www -> assume that I need an apache installation -> use a puppet module to install Apache ->
+
+@puppet module install puppetlabs/apache --modulepath /etc/puppet/modules/@
+
+To ensure that apache is always running added @service{ 'apache2': ensure => running}@.
+
+I want to start my own module, too.
+
+@puppet module generate ngiger-oddb_org  --modulepath /etc/puppet/modules/@
+
+Create new files @modules/ngiger-oddb_org/init.pp@ and adapted files to make
+@sudo -i puppet apply /etc/puppet/modules/ngiger-oddb_org/tests/init.pp --modulepath /etc/puppet/modules/@ run.
+
+But it seems that puppetlabs does not know too much about Gentoo, neither less about  Funtooo
+
+bc. sudo -i puppet apply /etc/puppet/modules/oddb_org/tests/init.pp --modulepath /etc/puppet/modules/
+Warning: Could not retrieve fact fqdn
+Error: Class['apache::params']: Unsupported operatingsystem: Gentoo at /etc/puppet/modules/apache/manifests/params.pp:93 on node localhost
+Error: Class['apache::params']: Unsupported operatingsystem: Gentoo at /etc/puppet/modules/apache/manifests/params.pp:93 on node localhost
+vagrant@localhost /etc/puppet $ 
+
+But using @package{ 'apache': }@ works.
+
+Now use vcsrepo to setup the git clone
+@puppet module install --modulepath /etc/puppet/modules/ puppetlabs-vcsrepo@
+
+Added files for oddb_org/oddb_git class and tests. I have problems running them as I get the following errors:
+
+bc. Error: Execution of '/usr/bin/git clone git://scm.ywesee.com/oddb.org/.git  /home/vagrant/oddb.org' returned 128: fatal: remote error: access denied or repository not exported: /oddb.org/.git 
+Cloning into '/home/vagrant/oddb.org'...
+
+Running the same command by hand was successfull:
+
+bc. usr/bin/git clone git://scm.ywesee.com/oddb.org/.git  /home/vagrant/oddb.org; res=$?; echo result of git was $res
+Cloning into '/home/vagrant/oddb.org'...
+remote: Counting objects: 37264, done.
+remote: Compressing objects: 100% (13388/13388), done.
+remote: Total 37264 (delta 29285), reused 30058 (delta 23513)
+Receiving objects: 100% (37264/37264), 18.12 MiB | 2.94 MiB/s, done.
+Resolving deltas: 100% (29285/29285), done.
+result of git was 0
+
+What can the problem be? I have puppet 2.7 via emerge and puppet 3.1.1 via gem. Decided to manually run the command and proceed to the next step.
+
+
+h1. Unsuccessfull tries to build a basebox using veewee
 
 Benutze Ruby 1.9.2p320 (ich wusste, dass damit gentoo läuft)
 
