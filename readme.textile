@@ -205,13 +205,18 @@ parse.y:84: syntax error, unexpected $end, expecting keyword_then or ',' or ';' 
         from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
         from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
 
-Next step is to setup the PostgreSQL database correctly. Already added all files as is and added them to the @modules/oddb_org/files@ in my repository at @/etc/puppet@.
+The following small errors had to be fixed:
+* some "missing gems":https://github.com/ngiger/oddb.org/commit/fd1e90931d49b54e7f1a6c41a9a5eb18d467fc77 
+* parse.y without "magic comment":https://github.com/ngiger/oddb.org/commit/fc2d8e7a795f3ecb08a3e9019b7085ddd49644d1
+* "facets needs version < 2.0.0":https://github.com/ngiger/oddb.org/commit/fa739fc68b8b6b1a9d304aa41eb1abf3a0fa73db
+* "Paypal misses a require":https://github.com/ngiger/oddb.org/commit/fd119fbea7a2049cbd7f61ef621b7e3f02c48cf3
 
-After two comments to fix some "missing gems":https://github.com/ngiger/oddb.org/commit/fd1e90931d49b54e7f1a6c41a9a5eb18d467fc77 and parse.y without "magic comment":https://github.com/ngiger/oddb.org/commit/fc2d8e7a795f3ecb08a3e9019b7085ddd49644d1 I proceeded much further.
+*TODO:* report magic comment problem and patch to upstream
 
-h3. Still errors in bin/oddb
 
-bc. bin/oddbd 
+h3. No oddbapp comes up and waits for the database server
+
+bc.  bin/oddbd 
 /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require': iconv will be deprecated in the future, use String#encode instead.
 could not find htmlgrid.so, falling back to pure-ruby class
 racc/parser.rb:33: warning: already initialized constant Racc_Runtime_Version
@@ -230,20 +235,30 @@ racc/parser.rb:53: warning: already initialized constant Racc_Runtime_Type
              version 1.0.0
 /var/www/oddb.org/src/view/changelog.rb:27: warning: already initialized constant SORT_DEFAULT
 /var/www/oddb.org/src/view/drugs/resultlist.rb:24: warning: already initialized constant BACKGROUND_SUFFIX
-/usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:52:in `<class:Notification>': undefined method `cattr_accessor' for Paypal::Notification:Class (NoMethodError)
-        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:40:in `<module:Paypal>'
-        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:3:in `<top (required)>'
+/usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbd-pg-0.3.9/lib/dbd/pg/database.rb:82:in `rescue in initialize': could not connect to server: No such file or directory (DBI::OperationalError)
+        Is the server running locally and accepting
+        connections on Unix domain socket "/run/postgresql/.s.PGSQL.5432"?
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbd-pg-0.3.9/lib/dbd/pg/database.rb:41:in `initialize'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbd-pg-0.3.9/lib/dbd/Pg.rb:157:in `new'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbd-pg-0.3.9/lib/dbd/Pg.rb:157:in `connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbi-0.4.5/lib/dbi/handles/driver.rb:33:in `connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/dbi-0.4.5/lib/dbi.rb:148:in `connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:63:in `block in _connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:62:in `times'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:62:in `_connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:59:in `block in connect'
+        from <internal:prelude>:10:in `synchronize'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:59:in `connect'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/connection_pool.rb:22:in `initialize'
+        from /var/www/oddb.org/etc/db_connection.rb:5:in `new'
+        from /var/www/oddb.org/etc/db_connection.rb:5:in `<top (required)>'
         from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
         from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
-        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/paypal.rb:30:in `<top (required)>'
-        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:60:in `require'
-        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:60:in `rescue in require'
-        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:35:in `require'
-        from /var/www/oddb.org/src/util/oddbapp.rb:31:in `<top (required)>'
-        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
-        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
-                from bin/oddbd:9:in `<main>'
+        from bin/oddbd:10:in `<main>'
+
         
+Next step is to setup the PostgreSQL database correctly. Already added all files as is and added them to the @modules/oddb_org/files@ in my repository at @/etc/puppet@.
+
 
 h1. DB für medi
 
