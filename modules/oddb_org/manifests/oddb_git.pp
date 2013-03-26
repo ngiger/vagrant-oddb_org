@@ -69,17 +69,34 @@ class oddb_org::oddb_git(
     mode  => 0754,
   }
   
-  if (true) {
   exec  { 'install_dbi':
   command => "$install_dbi_cmd",
     path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
-    require => [ File["$install_dbi_cmd", ], ],
-  }
+    require => [ File["$install_dbi_cmd"], ],
+    creates => '/opt/dbi/gen_gem.okay',
   }
 
+  file { "$ODDB_HOME/src/testenvironment.rb":
+    source => "puppet:///modules/oddb_org/testenvironment_rb.txt",
+    owner => 'apache',
+    group => 'apache',
+    mode  => 0554,
+    require => [Package['apache'], ],
+  }
+  
+  file { "$ODDB_HOME/etc/db_connection.rb":
+    source => "puppet:///modules/oddb_org/db_connection.rb.txt",
+    owner => 'apache',
+    group => 'apache',
+    mode  => 0554,
+    require => [Package['apache'], ],
+  }
+  
+  include oddb_org::apache
+  
 # TODO: 
 #  include oddb_org::pg
-#  package{ 'imagemagick': } # needed for gem rmagick
+#  package 'imagemagick':  # needed for gem rmagick
   
  
 }

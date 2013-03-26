@@ -39,12 +39,4 @@ class oddb_org(
   $destination = "/var/www",
 ) {
 
-# we need an apache installation
-#  class {'apache':  } # puppetlabs-apache does not work on gentoo
-  package{'apache': }
-  service{'apache2':
-    ensure => running,
- }   
- 
-
 }
