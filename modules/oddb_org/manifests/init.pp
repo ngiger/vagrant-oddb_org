@@ -40,6 +40,10 @@ class oddb_org(
 ) {
 
 # we need an apache installation
-  class {'apache':  }
+#  class {'apache':  } # puppetlabs-apache does not work on gentoo
+  package{'apache': }
+  service{'apache2':
+    ensure => running,
+ }   
 
 }
