@@ -158,7 +158,54 @@ ERROR: 'rake/gempackagetask' is obsolete and no longer supported. Use 'rubygems/
 /usr/local/rvm/gems/ruby-1.9.3-p392/bin/ruby_noexec_wrapper:14:in `<main>'
 (See full trace by running task with --trace)
 
-This problem was easy to fix. But afterwards there are a lot of errors with ruby 1.9.3
+This problem was easy to fix. But afterwards there are a lot of errors with ruby 1.9.3. Setting gem deprecated to version 2.0.1 fixed warnings about the deprecate. Now following errors:
+
+bc. rvm use ruby-1.8.7-p357 do gem install --no-ri --no-rdoc deprecated --version=2.0.1
+rvm use ruby-1.8.7-p357 do rake dbi
+rake aborted!
+uninitialized constant Rake::GemPackageTask
+./build/rake_task_lib.rb:39:in `build_package_tasks'
+./build/Rakefile.dbi.rb:50
+./build/Rakefile.dbi.rb:37
+/opt/dbi/Rakefile:4
+(See full trace by running task with --trace)
+
+
+Used "mirrorselect":http://en.gentoo-wiki.com/wiki/Mirrorselect to find better mirrors, as @emerge imagemagick@ failed. Tried @emerge =libjpeg-turbo-1.1.1@. Found only @ftp://mirror.switch.ch/mirror/gentoo/distfiles/libjpeg8_8d-1.debian.tar.gz@ emerge searches for @libjpeg8_8c-2.debian.tar.gz@. Question: How do I change the dependency?
+
+h3. Fixed dbi
+
+With the commit bd5b56e68d33d in my private copy of zenos "dbi":https://github.com/ngiger/ruby-dbi/commit/bd5b56e68d33d50f7e6044feb00cf3bedbef5120 I was able to install dbi via my setup script.
+
+h3. State of running oddb.org (Errors as expected)
+
+Now I was ready to manually execute @cd /var/www/oddb.org && bin/oddb@. Output was like this:
+
+bc.  bin/oddbd 
+/usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require': iconv will be deprecated in the future, use String#encode instead.
+could not find htmlgrid.so, falling back to pure-ruby class
+racc/parser.rb:33: warning: already initialized constant Racc_Runtime_Version
+racc/parser.rb:34: warning: already initialized constant Racc_Runtime_Revision
+racc/parser.rb:36: warning: already initialized constant Racc_Runtime_Core_Version_R
+racc/parser.rb:37: warning: already initialized constant Racc_Runtime_Core_Revision_R
+racc/parser.rb:41: warning: already initialized constant Racc_Runtime_Core_Revision_C
+racc/parser.rb:49: warning: already initialized constant Racc_Main_Parsing_Routine
+racc/parser.rb:50: warning: already initialized constant Racc_YY_Parse_Method
+racc/parser.rb:51: warning: already initialized constant Racc_Runtime_Core_Version
+racc/parser.rb:52: warning: already initialized constant Racc_Runtime_Core_Revision
+racc/parser.rb:53: warning: already initialized constant Racc_Runtime_Type
+/var/www/oddb.org/src/util/quanty/parse.rb:461:in `module_eval': parse.y:84: invalid multibyte char (US-ASCII) (SyntaxError)
+parse.y:84: invalid multibyte char (US-ASCII)
+parse.y:84: syntax error, unexpected $end, expecting keyword_then or ',' or ';' or '\n'
+      when /\A[A-Za-z_µ]+([A-Za-z_µ0-9-]+[A-Za-z_µ])?/ou
+                        ^
+        from /var/www/oddb.org/src/util/quanty/parse.rb:461:in `<class:Parse>'
+        from /var/www/oddb.org/src/util/quanty/parse.rb:459:in `<class:Quanty>'
+        from /var/www/oddb.org/src/util/quanty/parse.rb:457:in `<top (required)>'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+
+Next step is to setup the PostgreSQL database correctly. Already added all files as is and added them to the @modules/oddb_org/files@ in my repository at @/etc/puppet@.
 
 
 h1. DB für medi
