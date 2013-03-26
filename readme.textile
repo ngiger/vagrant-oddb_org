@@ -171,7 +171,7 @@ uninitialized constant Rake::GemPackageTask
 (See full trace by running task with --trace)
 
 
-Used "mirrorselect":http://en.gentoo-wiki.com/wiki/Mirrorselect to find better mirrors, as @emerge imagemagick@ failed. Tried @emerge =libjpeg-turbo-1.1.1@. Found only @ftp://mirror.switch.ch/mirror/gentoo/distfiles/libjpeg8_8d-1.debian.tar.gz@ emerge searches for @libjpeg8_8c-2.debian.tar.gz@. Question: How do I change the dependency?
+Used "mirrorselect":http://en.gentoo-wiki.com/wiki/Mirrorselect to find better mirrors, as @emerge imagemagick@ failed. Tried @emerge =libjpeg-turbo-1.1.1@. Found only @ftp://mirror.switch.ch/mirror/gentoo/distfiles/libjpeg8_8d-1.debian.tar.gz@ emerge searches for @libjpeg8_8c-2.debian.tar.gz@. After a call to @emerge --sync@ the problem went away!
 
 h3. Fixed dbi
 
@@ -207,6 +207,43 @@ parse.y:84: syntax error, unexpected $end, expecting keyword_then or ',' or ';' 
 
 Next step is to setup the PostgreSQL database correctly. Already added all files as is and added them to the @modules/oddb_org/files@ in my repository at @/etc/puppet@.
 
+After two comments to fix some "missing gems":https://github.com/ngiger/oddb.org/commit/fd1e90931d49b54e7f1a6c41a9a5eb18d467fc77 and parse.y without "magic comment":https://github.com/ngiger/oddb.org/commit/fc2d8e7a795f3ecb08a3e9019b7085ddd49644d1 I proceeded much further.
+
+h3. Still errors in bin/oddb
+
+bc. bin/oddbd 
+/usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require': iconv will be deprecated in the future, use String#encode instead.
+could not find htmlgrid.so, falling back to pure-ruby class
+racc/parser.rb:33: warning: already initialized constant Racc_Runtime_Version
+racc/parser.rb:34: warning: already initialized constant Racc_Runtime_Revision
+racc/parser.rb:36: warning: already initialized constant Racc_Runtime_Core_Version_R
+racc/parser.rb:37: warning: already initialized constant Racc_Runtime_Core_Revision_R
+racc/parser.rb:41: warning: already initialized constant Racc_Runtime_Core_Revision_C
+racc/parser.rb:49: warning: already initialized constant Racc_Main_Parsing_Routine
+racc/parser.rb:50: warning: already initialized constant Racc_YY_Parse_Method
+racc/parser.rb:51: warning: already initialized constant Racc_Runtime_Core_Version
+racc/parser.rb:52: warning: already initialized constant Racc_Runtime_Core_Revision
+racc/parser.rb:53: warning: already initialized constant Racc_Runtime_Type
+[DEPRECATED] By requiring 'spreadsheet/excel' you are loading a Compatibility
+             layer which provides a drop-in replacement for Spreadsheet::Excel
+             versions <= 0.3.5.1. This code will be removed in Spreadsheet
+             version 1.0.0
+/var/www/oddb.org/src/view/changelog.rb:27: warning: already initialized constant SORT_DEFAULT
+/var/www/oddb.org/src/view/drugs/resultlist.rb:24: warning: already initialized constant BACKGROUND_SUFFIX
+/usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:52:in `<class:Notification>': undefined method `cattr_accessor' for Paypal::Notification:Class (NoMethodError)
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:40:in `<module:Paypal>'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/notification.rb:3:in `<top (required)>'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/paypal-2.0.0/lib/paypal.rb:30:in `<top (required)>'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:60:in `require'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:60:in `rescue in require'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:35:in `require'
+        from /var/www/oddb.org/src/util/oddbapp.rb:31:in `<top (required)>'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+        from /usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require'
+                from bin/oddbd:9:in `<main>'
+        
 
 h1. DB für medi
 
