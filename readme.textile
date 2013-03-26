@@ -110,6 +110,66 @@ result of git was 0
 
 What can the problem be? I have puppet 2.7 via emerge and puppet 3.1.1 via gem. Decided to manually run the command and proceed to the next step.
 
+Now on my developer machine pointing firefox to @http://localhost:22080/@ works!
+
+After a phone call with Zeno I tried to clone from github via https and this worked flawlessly.
+
+Started a Gemfile with the list from the Guide.txt. A few gems excluded as they could not be found.
+
+Compiling errors were
+
+bc. Installing character-encodings (0.4.1) 
+Gem::Installer::ExtensionBuildError: ERROR: Failed to build gem native extension.
+        /usr/local/rvm/rubies/ruby-1.9.3-head/bin/ruby extconf.rb 
+extconf.rb:4: invalid multibyte char (US-ASCII)
+extconf.rb:4: invalid multibyte char (US-ASCII)
+extconf.rb:4: syntax error, unexpected $end, expecting keyword_end
+  checking_for "‘#{opt}’ option to compiler" do                  ^
+Gem files will remain installed in /usr/local/rvm/gems/ruby-1.9.3-head/gems/character-encodings-0.4.1 for inspection.
+Results logged to /usr/local/rvm/gems/ruby-1.9.3-head/gems/character-encodings-0.4.1/ext/encoding/character/utf-8/gem_make.out
+An error occurred while installing character-encodings (0.4.1), and Bundler cannot continue.
+Make sure that `gem install character-encodings -v '0.4.1'` succeeds before bundling.
+
+Also the gem pg could not be compiled. I assume that this is because of missing pg headers. Therefore I will try to install the correct postgres db.
+
+A try with the puppetlabs-postgresql module only ended in errors. Therefore resorted to use @package {'postgresql-base': ensure => '8.4.9', }@.  puppetlabs-postgresql would have be handy to populate the DB, creating users, etc.
+
+Switched to use @ruby-1.9.3-p392@. By @rvm install ruby-1.9.3-p392 && sudo -i rvm --default ruby-1.9.3-p392 &&sudo -i bundle install --gemfile /etc/puppet/Gemfile@
+
+Trying to install patched version of dbi:
+
+bc.  rake dbi
+rake aborted!
+ERROR: 'rake/gempackagetask' is obsolete and no longer supported. Use 'rubygems/package_task' instead.
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/gempackagetask.rb:1:in `<top (required)>'
+/tmp/dbi/build/rake_task_lib.rb:3:in `<top (required)>'
+/tmp/dbi/build/Rakefile.dbi.rb:1:in `<top (required)>'
+/tmp/dbi/Rakefile:4:in `<top (required)>'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/rake_module.rb:25:in `load'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/rake_module.rb:25:in `load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:589:in `raw_load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:89:in `block in load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:160:in `standard_exception_handling'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:88:in `load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:72:in `block in run'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:160:in `standard_exception_handling'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:70:in `run'
+/usr/local/rvm/gems/ruby-1.9.3-p392/bin/ruby_noexec_wrapper:14:in `eval'
+/usr/local/rvm/gems/ruby-1.9.3-p392/bin/ruby_noexec_wrapper:14:in `<main>'
+(See full trace by running task with --trace)
+
+This problem was easy to fix. But afterwards there are a lot of errors with ruby 1.9.3
+
+
+h1. DB für medi
+
+Gemäss E-Mail
+
+http://pillbox.oddb.org/postgresql_database-oddb.org.ruby193-backup.gz (728 MB)
+
+Das Skript welches bei mir die DB dropped und neu erstellt, habe ich Dir attached. Das greift direkt auf unseren Server zu, dort kommt Du noch nicht drauf aber wie wir die DB erstellen und droppen ist dort trotzdem drinnen.
+
+Siehe Anhang.
 
 h1. Unsuccessfull tries to build a basebox using veewee
 
