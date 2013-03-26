@@ -5,7 +5,7 @@ class oddb_org::apache inherits oddb_org {
 
   # we need an apache installation
   #  class {'apache':  } # puppetlabs-apache does not work on gentoo
-    package{'apache': }
+#    package{'apache': }
     service{'apache2':
       ensure => running,
   }   

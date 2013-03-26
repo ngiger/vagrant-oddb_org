@@ -37,6 +37,12 @@
 #
 class oddb_org(
   $destination = "/var/www",
+  $pg_base_version  = '8.4.16',
+  $pg_server_version  = '8.4.16-r1',
 ) {
-
+    package{'apache': }
+    package {'postgresql-base':
+      ensure => $pg_version,
+    }  
+       
 }
