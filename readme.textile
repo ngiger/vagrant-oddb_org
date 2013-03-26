@@ -25,7 +25,7 @@ Now I want to be able to run puppet manifests as root with puppet 3.1 and ruby 1
 @sudo -i rvm --default ruby-1.9.2-p290@
 @sudo -i rvm get stable@
 
-Then modified /etc/profile.env to get rid of RUBYOPTS with -rauto_gem. I use rvm.
+Then modified /etc/env.d/10rubygems to get rid of RUBYOPTS with -rauto_gem. I use rvm.
 
 @sudo -i gem install bundler@
 @sudo -iH bundle install --gemfile /etc/puppet/Gemfile@
@@ -46,10 +46,132 @@ Next step is to make hiera work.
 
 bc. sudo -i hiera xx
 Failed to start Hiera: RuntimeError: Config file /etc/hiera.yaml not found
+vagrant@localhost /etc/puppet $ sudo ln -s /etc/puppet/hiera.yaml  /etc/
+vagrant@localhost /etc/puppet $ hiera --debug xxx
+DEBUG: 2013-03-25 14:27:34 -0700: Hiera YAML backend starting
+DEBUG: 2013-03-25 14:27:34 -0700: Looking up xxx in YAML backend
+DEBUG: 2013-03-25 14:27:34 -0700: Looking for data source private/config
+DEBUG: 2013-03-25 14:27:34 -0700: Cannot find datafile /etc/puppet/private/config.yaml, skipping
+DEBUG: 2013-03-25 14:27:34 -0700: Looking for data source hieradata/common
+DEBUG: 2013-03-25 14:27:34 -0700: Found xxx in hieradata/common
+Default config value for variable xxx
+date is Mon Mar 25 14:28:12 PDT 2013
 
-Copied my .ssh/keys to be able to push into my github projec.
+Copied my .ssh/keys to be able to push into my github project. date and ssh-add don't work correctly neither!
+Pushed work to github. (commit "hiera works now correctly")
+
+Create a sshfs to exchange my files.
+@/usr/bin/sshfs -p 22022 -o reconnect -o follow_symlinks vagrant@localhost:/ /mnt/oddb_org@
 
 
+h2. Following the script
+
+References /var/www -> assume that I need an apache installation -> use a puppet module to install Apache ->
+
+@puppet module install puppetlabs/apache --modulepath /etc/puppet/modules/@
+
+To ensure that apache is always running added @service{ 'apache2': ensure => running}@.
+
+I want to start my own module, too.
+
+@puppet module generate ngiger-oddb_org  --modulepath /etc/puppet/modules/@
+
+Create new files @modules/ngiger-oddb_org/init.pp@ and adapted files to make
+@sudo -i puppet apply /etc/puppet/modules/ngiger-oddb_org/tests/init.pp --modulepath /etc/puppet/modules/@ run.
+
+But it seems that puppetlabs does not know too much about Gentoo, neither less about  Funtooo
+
+bc. sudo -i puppet apply /etc/puppet/modules/oddb_org/tests/init.pp --modulepath /etc/puppet/modules/
+Warning: Could not retrieve fact fqdn
+Error: Class['apache::params']: Unsupported operatingsystem: Gentoo at /etc/puppet/modules/apache/manifests/params.pp:93 on node localhost
+Error: Class['apache::params']: Unsupported operatingsystem: Gentoo at /etc/puppet/modules/apache/manifests/params.pp:93 on node localhost
+vagrant@localhost /etc/puppet $ 
+
+But using @package{ 'apache': }@ works.
+
+Now use vcsrepo to setup the git clone
+@puppet module install --modulepath /etc/puppet/modules/ puppetlabs-vcsrepo@
+
+Added files for oddb_org/oddb_git class and tests. I have problems running them as I get the following errors:
+
+bc. Error: Execution of '/usr/bin/git clone git://scm.ywesee.com/oddb.org/.git  /home/vagrant/oddb.org' returned 128: fatal: remote error: access denied or repository not exported: /oddb.org/.git 
+Cloning into '/home/vagrant/oddb.org'...
+
+Running the same command by hand was successfull:
+
+bc. usr/bin/git clone git://scm.ywesee.com/oddb.org/.git  /home/vagrant/oddb.org; res=$?; echo result of git was $res
+Cloning into '/home/vagrant/oddb.org'...
+remote: Counting objects: 37264, done.
+remote: Compressing objects: 100% (13388/13388), done.
+remote: Total 37264 (delta 29285), reused 30058 (delta 23513)
+Receiving objects: 100% (37264/37264), 18.12 MiB | 2.94 MiB/s, done.
+Resolving deltas: 100% (29285/29285), done.
+result of git was 0
+
+What can the problem be? I have puppet 2.7 via emerge and puppet 3.1.1 via gem. Decided to manually run the command and proceed to the next step.
+
+Now on my developer machine pointing firefox to @http://localhost:22080/@ works!
+
+After a phone call with Zeno I tried to clone from github via https and this worked flawlessly.
+
+Started a Gemfile with the list from the Guide.txt. A few gems excluded as they could not be found.
+
+Compiling errors were
+
+bc. Installing character-encodings (0.4.1) 
+Gem::Installer::ExtensionBuildError: ERROR: Failed to build gem native extension.
+        /usr/local/rvm/rubies/ruby-1.9.3-head/bin/ruby extconf.rb 
+extconf.rb:4: invalid multibyte char (US-ASCII)
+extconf.rb:4: invalid multibyte char (US-ASCII)
+extconf.rb:4: syntax error, unexpected $end, expecting keyword_end
+  checking_for "‘#{opt}’ option to compiler" do                  ^
+Gem files will remain installed in /usr/local/rvm/gems/ruby-1.9.3-head/gems/character-encodings-0.4.1 for inspection.
+Results logged to /usr/local/rvm/gems/ruby-1.9.3-head/gems/character-encodings-0.4.1/ext/encoding/character/utf-8/gem_make.out
+An error occurred while installing character-encodings (0.4.1), and Bundler cannot continue.
+Make sure that `gem install character-encodings -v '0.4.1'` succeeds before bundling.
+
+Also the gem pg could not be compiled. I assume that this is because of missing pg headers. Therefore I will try to install the correct postgres db.
+
+A try with the puppetlabs-postgresql module only ended in errors. Therefore resorted to use @package {'postgresql-base': ensure => '8.4.9', }@.  puppetlabs-postgresql would have be handy to populate the DB, creating users, etc.
+
+Switched to use @ruby-1.9.3-p392@. By @rvm install ruby-1.9.3-p392 && sudo -i rvm --default ruby-1.9.3-p392 &&sudo -i bundle install --gemfile /etc/puppet/Gemfile@
+
+Trying to install patched version of dbi:
+
+bc.  rake dbi
+rake aborted!
+ERROR: 'rake/gempackagetask' is obsolete and no longer supported. Use 'rubygems/package_task' instead.
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/gempackagetask.rb:1:in `<top (required)>'
+/tmp/dbi/build/rake_task_lib.rb:3:in `<top (required)>'
+/tmp/dbi/build/Rakefile.dbi.rb:1:in `<top (required)>'
+/tmp/dbi/Rakefile:4:in `<top (required)>'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/rake_module.rb:25:in `load'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/rake_module.rb:25:in `load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:589:in `raw_load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:89:in `block in load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:160:in `standard_exception_handling'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:88:in `load_rakefile'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:72:in `block in run'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:160:in `standard_exception_handling'
+/usr/local/rvm/gems/ruby-1.9.3-p392@global/gems/rake-10.0.4/lib/rake/application.rb:70:in `run'
+/usr/local/rvm/gems/ruby-1.9.3-p392/bin/ruby_noexec_wrapper:14:in `eval'
+/usr/local/rvm/gems/ruby-1.9.3-p392/bin/ruby_noexec_wrapper:14:in `<main>'
+(See full trace by running task with --trace)
+
+This problem was easy to fix. But afterwards there are a lot of errors with ruby 1.9.3
+
+
+h1. DB für medi
+
+Gemäss E-Mail
+
+http://pillbox.oddb.org/postgresql_database-oddb.org.ruby193-backup.gz (728 MB)
+
+Das Skript welches bei mir die DB dropped und neu erstellt, habe ich Dir attached. Das greift direkt auf unseren Server zu, dort kommt Du noch nicht drauf aber wie wir die DB erstellen und droppen ist dort trotzdem drinnen.
+
+Siehe Anhang.
+
+h1. Unsuccessfull tries to build a basebox using veewee
 
 Benutze Ruby 1.9.2p320 (ich wusste, dass damit gentoo läuft)
 
