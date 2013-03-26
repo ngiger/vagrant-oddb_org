@@ -2,8 +2,10 @@
 
 class { 'git': }
 
-class oddb_org::oddb_git inherits oddb_org {
-  $oddbRoot = '/var/www/oddb.org'
+class oddb_org::oddb_git(
+  $ODDB_HOME = '/var/www/oddb.org',
+  $SETUP_DIR = '/home/vagrant/oddb_setup',
+) inherits oddb_org {
   
   if !defined(User['apache']) {
     user{'apache': require => Package['apache']}
@@ -11,12 +13,73 @@ class oddb_org::oddb_git inherits oddb_org {
   if !defined(Group['apache']) {
     group{'apache': require => Package['apache']}
   }
-  vcsrepo {  "$oddbRoot":
+  vcsrepo {  "$ODDB_HOME":
       ensure => present,
       provider => git,
       owner => 'apache',
       group => 'apache',
-      source => "git://scm.ywesee.com/oddb.org/.git ",
+      source => 'https://github.com/zdavatz/oddb.org.git',
+      # cloning via git did not work!
+      # source => "git://scm.ywesee.com/oddb.org/.git ",
       require => [User['apache'],],
   }  
+  
+  package{ 'bundler':
+    provider => gem,
+   }
+   
+  exec { 'bundle_oddb_org':
+    command => "rvm list && pwd && rvm ruby-1.9.3-p392 do bundle install && touch install.okay",
+    creates => "$ODDB_HOME/install.okay",
+    cwd => "$ODDB_HOME",
+    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    require => [  Package['bundler'], # TODO: 'imagemagick'
+    Vcsrepo[$ODDB_HOME],
+# TODO:    Package['postgresql-base'], 
+    ],
+  }
+  
+  $oddb_setup_sh  = '/usr/local/bin/oddb_setup.sh'
+  file { "$oddb_setup_sh":
+    content => template('oddb_org/oddb_setup.sh.erb'),
+    owner => 'root',
+    group => 'root',
+    mode  => 0754,
+  }
+
+  exec { 'run_oddb_setup.sh':
+    command => "$oddb_setup_sh",
+    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    creates => '/var/www/oddb.org/oddb_setup.okay',
+    require => [  File[ "$oddb_setup_sh"], 
+        Vcsrepo[$ODDB_HOME],  
+    ],
+  }
+  
+
+  package{ 'zip': } # needed to rake dbi!
+  
+  $dbi_root =  "/opt/dbi"
+  $install_dbi_cmd = "/usr/local/bin/install_dbi.sh"
+  
+  file { "$install_dbi_cmd":
+    content => template('oddb_org/install_dbi.sh.erb'),
+    owner => 'root',
+    group => 'root',
+    mode  => 0754,
+  }
+  
+  if (true) {
+  exec  { 'install_dbi':
+  command => "$install_dbi_cmd",
+    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    require => [ File["$install_dbi_cmd", ], ],
+  }
+  }
+
+# TODO: 
+#  include oddb_org::pg
+#  package{ 'imagemagick': } # needed for gem rmagick
+  
+ 
 }

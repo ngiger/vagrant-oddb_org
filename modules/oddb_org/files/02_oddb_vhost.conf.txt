@@ -1,0 +1,22 @@
+<Directory /var/www/oddb.org/doc>
+        Options ExecCGI FollowSymlinks Indexes
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+</Directory>
+<Directory /var/www/oddb.org/data/css>
+        Order allow,deny
+        Allow from all
+</Directory>
+
+<VirtualHost *:80>
+        DocumentRoot /var/www/oddb.org/doc
+        ServerName oddb.zeno.org
+        DirectoryIndex index.rbx
+        RubyAddPath /var/www/oddb.org/src
+	RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.0.7/lib
+	RubyRequire 'sbsm/trans_handler'
+	SetHandler ruby-object
+        RubyTransHandler SBSM::FlavoredTransHandler.instance
+        SetEnv DEFAULT_FLAVOR gcc
+</VirtualHost>

@@ -1,0 +1,7 @@
+require 'dbi'                                                                     
+require 'odba/connection_pool'                                                    
+require 'pg'                                            
+                        
+ODBA.storage.dbi = ODBA::ConnectionPool.new('DBI:Pg:oddb.org.ruby193', 'postgres', '') 
+#ODBA.storage.dbi = ODBA::ConnectionPool.new('DBI:Pg:oddb.org', 'postgres', '') 
+

@@ -1,0 +1,35 @@
+#!/bin/bash -v
+# TODO: for unknown reason ERB templates don't their variables set correctly,e.g cd <%= $ODDB_HOME %>
+# Workaround. put correct values
+cd /var/www/oddb.org
+cd data
+mkdir -p pdf
+cd quanty
+pwd
+ruby18 extconf.rb
+if [ $? -ne 0 ] ; then exit 1; fi
+make
+if [ $? -ne 0 ] ; then exit 1; fi
+make install
+if [ $? -ne 0 ] ; then exit 1; fi
+cd ../..
+cp .git/refs/heads/master .git/ORIG_HEAD
+echo first half done
+cp /home/vagrant/oddb_setup/db_connection.rb etc/
+cp /home/vagrant/oddb_setup/robots-disallow.txt doc/
+cp -r /home/vagrant/oddb_setup/captcha data
+ruby bin/update_css
+
+# cp /home/vagrant/oddb_setup/dojo-release-1.3.0.tar.gz doc/resources
+# if [ $? -ne 0 ] ; then exit 1; fi
+# cd doc/resources
+# tar zxvf dojo-release-1.3.0.tar.gz
+# mv dojo-release-1.3.0 dojo
+# cp /home/vagrant/oddb_setup/oddb.yml ../../etc/
+# scp -r ywesee@thinpower.ywesee.com:/var/www/oddb.org/doc/resources/sponsor .
+# if [ $? -ne 0 ] ; then exit 1; fi
+# # for local jobs import/export scripts
+# cp /home/vagrant/oddb_setup/testenvironment.rb ../../src/
+# cp /home/vagrant/oddb_setup/testenvironment2.rb ../../src/
+# cp /home/vagrant/oddb_setup/gitignore ../../.gitignore
+touch /var/www/oddb.org/oddb_setup.okay

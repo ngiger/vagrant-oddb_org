@@ -45,5 +45,6 @@ class oddb_org(
   service{'apache2':
     ensure => running,
  }   
+ 
 
 }

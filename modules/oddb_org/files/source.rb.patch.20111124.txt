@@ -1,0 +1,20 @@
+*** /usr/local/lib64/ruby/1.9.1/rexml/source.rb	2011-11-24 11:50:17.270431890 +0100
+--- source.rb	2011-11-24 11:49:51.950605222 +0100
+***************
+*** 207,213 ****
+      end
+  
+      def match( pattern, cons=false )
+!       rv = pattern.match(@buffer)
+        @buffer = $' if cons and rv
+        while !rv and @source
+          begin
+--- 207,214 ----
+      end
+  
+      def match( pattern, cons=false )
+!       #rv = pattern.match(@buffer)
+!       rv = pattern.match(@buffer.force_encoding('utf-8'))
+        @buffer = $' if cons and rv
+        while !rv and @source
+          begin

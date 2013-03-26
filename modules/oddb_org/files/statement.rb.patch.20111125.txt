@@ -1,0 +1,20 @@
+*** statement.rb	2011-11-25 12:01:35.253115670 +0100
+--- /usr/local/lib/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi/handles/statement.rb	2011-11-25 12:00:49.368445954 +0100
+***************
+*** 327,333 ****
+              begin
+                  while row = fetch do
+                      #fetched_rows.push(row)
+!                     fetched_rows.push(row.to_a)
+                  end
+              rescue Exception
+              end
+--- 327,334 ----
+              begin
+                  while row = fetch do
+                      #fetched_rows.push(row)
+!                     #fetched_rows.push(row.to_a)
+!                     fetched_rows.push(row.dup)
+                  end
+              rescue Exception
+              end

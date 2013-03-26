@@ -1,0 +1,24 @@
+<Directory /home/masa/ywesee/oddb.org/doc>
+	Options ExecCGI FollowSymlinks Indexes
+	AllowOverride None
+	Order allow,deny
+	Allow from all
+</Directory>
+<Directory /home/masa/ywesee/oddb.org/data/css>
+	Order allow,deny
+	Allow from all
+</Directory>
+
+<VirtualHost *:80>
+	DocumentRoot /home/masa/ywesee/oddb.org/doc
+	ServerName oddb.masa.org
+	DirectoryIndex index.rbx
+	#DirectoryIndex index.html
+	RubyAddPath /home/masa/ywesee/oddb.org/src
+	RubyRequire 'sbsm/trans_handler'
+	SetHandler ruby-object
+	RubyTransHandler SBSM::FlavoredTransHandler.instance
+	SetEnv DEFAULT_FLAVOR gcc
+</VirtualHost>
+
+

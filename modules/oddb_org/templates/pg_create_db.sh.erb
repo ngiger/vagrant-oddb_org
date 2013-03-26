@@ -1,0 +1,20 @@
+#!/bin/bash -v
+# TODO: for unknown reason ERB templates don't their variables set correctly,e.g cd <%= $ODDB_HOME %>
+# Workaround. put correct values
+cd /var/www/oddb.org
+ODDB_HOME='/var/www/oddb.org'
+
+yyyy=`date -d '1 days ago' +"%Y"`
+mm=`date -d '1 days ago' +"%m"`
+dd=`date -d '1 days ago' +"%d"`
+
+m=(dummy January February March April May June July August September October November December)
+nm=`expr $mm + 0`
+sudo -u postgres dropdb oddb.org.ruby193
+sudo -u postgres createdb -E UTF8 -T template0 oddb.org.ruby193
+cd $ODDB_HOME/oddb.org
+mkdir data/sql
+scp ywesee@thinpower.ywesee.com:/var/backup/thinpower/db/postgresql/${m[nm]}-$yyyy/$yyyy-$mm-$dd/22\:00-postgresql_database-oddb.org.ruby193-backup.gz data/sql/oddb.org.ruby193.$yyyy$mm$dd.sql.gz
+cd data/sql
+zcat oddb.org.ruby193.$yyyy$mm$dd.sql.gz | psql -U postgres oddb.org.ruby193
+

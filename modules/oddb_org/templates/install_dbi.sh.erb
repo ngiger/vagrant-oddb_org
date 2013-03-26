@@ -1,0 +1,25 @@
+#!/bin/bash -v
+DBI_ROOT=/opt/dbi
+# RUBY_VERS=ruby-1.8.7-p357
+RUBY_VERS=ruby-1.9.3-p392
+
+if [ $? -ne 0 ] ; then exit 1; fi
+rvm list
+if [ -d $DBI_ROOT ] ; then echo $DBI_ROOT exists already
+else 
+  git clone https://github.com/ngiger/ruby-dbi.git $DBI_ROOT
+fi
+if [ $? -ne 0 ] ; then exit 1; fi
+cd $DBI_ROOT
+if [ $? -ne 0 ] ; then exit 1; fi
+git checkout .
+if [ $? -ne 0 ] ; then exit 1; fi
+gem install --no-ri --no-rdoc deprecated --version=2.0.1
+if [ $? -ne 0 ] ; then exit 1; fi
+gem install --no-ri --no-rdoc rdoc
+if [ $? -ne 0 ] ; then exit 1; fi
+rake dbi
+if [ $? -ne 0 ] ; then exit 1; fi
+gem install --no-ri --no-rdoc pkg/dbi-0.4.5.gem
+if [ $? -ne 0 ] ; then exit 1; fi
+touch gen_gem.okay

@@ -1,0 +1,37 @@
+*** row.rb	2011-11-25 12:02:36.446675735 +0100
+--- /usr/local/lib/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi/row.rb	2011-11-25 12:01:00.075368851 +0100
+***************
+*** 217,223 ****
+              def __setobj__(obj)
+                  @delegate_dc_obj = @arr = obj
+              end
+!         else
+              #
+              # See Object#clone.
+              #
+--- 217,224 ----
+              def __setobj__(obj)
+                  @delegate_dc_obj = @arr = obj
+              end
+!         #else
+!         end
+              #
+              # See Object#clone.
+              #
+***************
+*** 238,244 ****
+                  row.instance_variable_set :@_dc_obj,       arr
+                  row
+              end
+!         end
+  
+          private
+  
+--- 239,245 ----
+                  row.instance_variable_set :@_dc_obj,       arr
+                  row
+              end
+!         #end
+  
+          private
+  
