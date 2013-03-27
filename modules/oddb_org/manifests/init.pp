@@ -45,4 +45,11 @@ class oddb_org(
       ensure => $pg_version,
     }  
        
+   file{'/etc/localtime':
+      ensure => link,
+      target => '../usr/share/zoneinfo/Europe/Zurich',
+      owner => 'root',
+      group => 'root',
+      mode  => 0555,
+    }
 }

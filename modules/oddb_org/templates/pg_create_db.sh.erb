@@ -18,4 +18,3 @@ mkdir data/sql
 # scp ywesee@thinpower.ywesee.com:/var/backup/thinpower/db/postgresql/${m[nm]}-$yyyy/$yyyy-$mm-$dd/22\:00-postgresql_database-oddb.org.ruby193-backup.gz data/sql/oddb.org.ruby193.$yyyy$mm$dd.sql.gz
 cd data/sql
 zcat $DB_FILE | psql -U postgres oddb.org.ruby193
-

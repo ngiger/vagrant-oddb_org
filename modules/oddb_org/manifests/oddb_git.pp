@@ -5,7 +5,7 @@ class { 'git': }
 class oddb_org::oddb_git(
   $ODDB_HOME = '/var/www/oddb.org',
   $SETUP_DIR = '/home/vagrant/oddb_setup',
-) inherits oddb_org {
+) inherits oddb_org::pg {
   
   if !defined(User['apache']) {
     user{'apache': require => Package['apache']}
@@ -50,9 +50,10 @@ class oddb_org::oddb_git(
   exec { 'run_oddb_setup.sh':
     command => "$oddb_setup_sh",
     path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
-    creates => '/var/www/oddb.org/oddb_setup.okay',
+    creates => '/opt/oddb_setup.okay',
     require => [  File[ "$oddb_setup_sh"], 
-        Vcsrepo[$ODDB_HOME],  
+        Vcsrepo[$ODDB_HOME], 
+        Service['postgresql-8.4'],
     ],
   }
   
@@ -92,7 +93,7 @@ class oddb_org::oddb_git(
     require => [Package['apache'], ],
   }
   
-  include oddb_org::apache
+  # include oddb_org::apache
   
 # TODO: 
 #  include oddb_org::pg
