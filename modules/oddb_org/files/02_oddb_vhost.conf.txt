@@ -1,3 +1,5 @@
+LoadModule ruby_module /usr/lib/apache2/modules/mod_ruby.so
+
 <Directory /var/www/oddb.org/doc>
         Options ExecCGI FollowSymlinks Indexes
         AllowOverride None
@@ -14,7 +16,7 @@
         ServerName oddb.zeno.org
         DirectoryIndex index.rbx
         RubyAddPath /var/www/oddb.org/src
-	RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.0.7/lib
+	RubyAddPath /usr/local/rvm/gems/ruby-1.9.3-p392/gems/sbsm-1.2.3/lib/sbsm
 	RubyRequire 'sbsm/trans_handler'
 	SetHandler ruby-object
         RubyTransHandler SBSM::FlavoredTransHandler.instance
