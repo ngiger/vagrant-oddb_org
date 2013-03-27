@@ -264,6 +264,8 @@ Some more fixes to make @puppet apply /etc/puppet/modules/oddb_org/tests/oddb_or
 
 Loading the pg-dump work at the third attempt. At the second attempt it took longer than the default timeout of 5 minutes for running puppet commands. Measured 5 minutes and 12 seconds. Takes about 4 GB of disk space.
 
+*TODO:* I am not sure whether it is needed to chmod 0777 /run/postgresql to enable connections.
+
 Now starting bin/oddb fails with:
 
 bc. bin/oddbd 
