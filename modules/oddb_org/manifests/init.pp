@@ -36,9 +36,10 @@
 # Copyright 2013 Your name here, unless otherwise noted.
 #
 class oddb_org(
-  $destination = "/var/www",
-  $pg_base_version  = '8.4.16',
+  $destination        = "/var/www",
+  $pg_base_version    = '8.4.16',
   $pg_server_version  = '8.4.16-r1',
+  $ruby_version       = '1.9.3-p392',
 ) {
     package{'apache': }
     package {'postgresql-base':
