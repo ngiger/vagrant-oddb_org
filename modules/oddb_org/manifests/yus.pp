@@ -18,20 +18,25 @@ class oddb_org::yus(
     ensure => present,
   }
   
-  package{'dbi':
+  package{'dev-ruby/dbi':
     ensure => present,
   }
   
-  package{'dbd-pg':
-    ensure => present,
-  }
+#  package{'dev-ruby/dbd-pg': # cannot be done here as puppet reports
+# err: /Stage[main]/Oddb_org::Yus/Package[dev-ruby/dbd-pg]: Could not evaluate: Execution of '/usr/bin/eix --nocolor --pure-packages --stable --format <category> <name> [<installedversions:LASTVERSION>] [<bestversion:LASTVERSION>] <homepage> <description>
+# --exact --category-name dev-ruby/dbd-pg' returned 1: 
+#    ensure => present,
+#    provider => portage,
+#  }
 
   package{'deprecated':
     ensure => absent,
+    provider => portage,
   }
   
   package{'pg':
     ensure => absent,
+    provider => portage,
   }
   
   $rsa_keyfile = "/etc/yus/data/${username}_rsa"
@@ -100,13 +105,13 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     require => [Package['apache'], ],
   }
   
-  $yus_installed = "/etc/yus/yus_installed.okay"
+  $yus_installed = "/usr/local/bin/yusd"
   exec{ "$yus_installed":
     command => "$yus_install_script && touch $yus_installed",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [File["$yus_install_script", '/etc/yus'], ],
-    creates => "$yus_installed",
-    user => 'postgres',
+    creates => "/usr/local/bin/yusd",
+    user => 'root',
   }
 
   $yaml_content = "# Managed by puppet in module oddb_org/manifests/yus.pp
