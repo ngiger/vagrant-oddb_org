@@ -299,7 +299,20 @@ init system
         from bin/oddbd:42:in `new'
         from bin/oddbd:42:in `<main>'
 
- 
+
+Created helper ruby script to patch a ruby gem (which probably will need refinement if on the same machine there were also clones of file to patch). See @modules/oddb_org/files/apply_ruby_patch.rb@. After that things began to look better and bin/oddb starts up.
+
+bc. bin/oddbd
+<..>
+process: Oddb (OddbApp)
+init system
+init system: 23.597038449
+setup drb-delegation
+reset
+reset: 23.597334576
+system initialized
+initialized: 23.676577887
+
 
 h1. DB für medi
 
