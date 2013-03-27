@@ -259,6 +259,45 @@ racc/parser.rb:53: warning: already initialized constant Racc_Runtime_Type
         
 Next step is to setup the PostgreSQL database correctly. Already added all files as is and added them to the @modules/oddb_org/files@ in my repository at @/etc/puppet@.
 
+Added some small script stops @manifests/pg.pg@  and @manifests/oddb_org.pg@. Loading the dumped database file fails, because of missing disk space. Added a 20GB sdb drive. Adapted /etc/fstab, unmerged postgresql-server-8.4 and move /var/lib/postgresql -> /mnt/sdb1 and created a logical link.
+Some more fixes to make @puppet apply /etc/puppet/modules/oddb_org/tests/oddb_org.pp@ work again.
+
+Loading the pg-dump work at the third attempt. At the second attempt it took longer than the default timeout of 5 minutes for running puppet commands. Measured 5 minutes and 12 seconds. Takes about 4 GB of disk space.
+
+Now starting bin/oddb fails with:
+
+bc. bin/oddbd 
+/usr/local/rvm/rubies/ruby-1.9.3-p392/lib/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require': iconv will be deprecated in the future, use String#encode instead.
+could not find htmlgrid.so, falling back to pure-ruby class
+<..>
+ERROR:  relation "target_id_oddb_package_name_with_size_company_name_and_ean13" already exists
+process: Oddb (OddbApp)
+init system
+/usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/marshal.rb:15:in `load': undefined class/module CSV::Cell (ArgumentError)
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/marshal.rb:15:in `load'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:239:in `block in fetch_collection'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:238:in `each'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:238:in `fetch_collection'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:632:in `restore'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:318:in `block in fetch_or_restore'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:313:in `call'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:313:in `fetch_or_do'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:317:in `fetch_or_restore'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:640:in `restore_object'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:605:in `load_object'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:226:in `block in fetch'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:313:in `call'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:313:in `fetch_or_do'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/cache.rb:225:in `fetch'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/stub.rb:49:in `odba_receiver'
+        from /usr/local/rvm/gems/ruby-1.9.3-p392/gems/odba-1.1.0/lib/odba/stub.rb:112:in `method_missing'
+        from /var/www/oddb.org/src/util/oddbapp.rb:775:in `rebuild_atc_chooser'
+        from /var/www/oddb.org/src/util/oddbapp.rb:101:in `init'
+        from /var/www/oddb.org/src/util/oddbapp.rb:1420:in `initialize'
+        from bin/oddbd:42:in `new'
+        from bin/oddbd:42:in `<main>'
+
+ 
 
 h1. DB für medi
 
