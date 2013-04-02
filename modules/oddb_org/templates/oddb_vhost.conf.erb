@@ -1,0 +1,24 @@
+LoadModule ruby_module /usr/lib/apache2/modules/mod_ruby.so
+
+<Directory /var/www/oddb.org/doc>
+        Options ExecCGI FollowSymlinks Indexes
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+</Directory>
+<Directory /var/www/oddb.org/data/css>
+        Order allow,deny
+        Allow from all
+</Directory>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName <%= foostatus = scope.lookupvar('server_name') %> 
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyAddPath /usr/local/rvm/gems/ruby-1.9.3-p392/gems/sbsm-1.2.3/lib/sbsm
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  SetEnv DEFAULT_FLAVOR gcc
+</VirtualHost>

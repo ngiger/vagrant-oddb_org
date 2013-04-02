@@ -5,45 +5,26 @@ class oddb_org::yus(
   $username = 'niklaus',
   $root_name = "niklaus@ywesee.com",
   $root_pass = "ec74c79bb6e82b4a0a448f6a1134d8fd4fd3c6ff40fd7ec58adee9805c757c24",
-  $yus_ruby_version = '1.8.7_p371'
-) inherits oddb_org {
-  # at the moment we assume it as installed!
+  $yus_ruby_version = '1.8.7_p371',
+  $yus_root   = "/etc/yus",
+  $yus_data   = "/etc/yus/data"
+) inherits oddb_org::pg {
 
-# package{"ruby":
-#    ensure => "$yus_ruby_version",
-#  }
-# commented out as puppet emerges it each time I call pupet
-
+  if !defined(User['postgres']) {
+    user{'postgres':}     
+  }
+  
   package{'ruby-password':
     ensure => present,
   }
   
-  package{'dev-ruby/dbi':
-    ensure => present,
-  }
-  
-#  package{'dev-ruby/dbd-pg': # cannot be done here as puppet reports
-# err: /Stage[main]/Oddb_org::Yus/Package[dev-ruby/dbd-pg]: Could not evaluate: Execution of '/usr/bin/eix --nocolor --pure-packages --stable --format <category> <name> [<installedversions:LASTVERSION>] [<bestversion:LASTVERSION>] <homepage> <description>
-# --exact --category-name dev-ruby/dbd-pg' returned 1: 
-#    ensure => present,
-#    provider => portage,
-#  }
-
-  package{'deprecated':
-    ensure => absent,
-    provider => portage,
-  }
-  
-  package{'pg':
-    ensure => absent,
-    provider => portage,
-  }
-  
-  $rsa_keyfile = "/etc/yus/data/${username}_rsa"
+  # Installing yus is done via a script as it is a delicate mix of ruby18/gem18 and emerge!
+  $rsa_keyfile = "${yus_data}/${username}_rsa"
   exec{ "$rsa_keyfile":
     command => "ssh-keygen -t rsa -f $rsa_keyfile",
     creates => "$rsa_keyfile",
     path => '/usr/local/bin:/usr/bin:/bin',
+    require => File["${yus_data}"],
   }
   
   # run RUBYOPT=-rauto_gem rvm system do ruby /usr/local/bin/dbi_test.rb
@@ -51,30 +32,32 @@ class oddb_org::yus(
     source => "puppet:///modules/oddb_org/dbi_test.rb",
       owner => 'postgres',
       group => 'postgres',
+      require => User['postgres'],
       mode => '0755',
   }
     
-  file {'/etc/yus':
+  file {"$yus_root":
     ensure => directory,
       owner => 'postgres',
       group => 'postgres',
+      require => User['postgres'],
       mode => '0644',
   }
     
-  file {'/etc/yus/data':
+  file {"$yus_data":
     ensure => directory,
       owner => 'postgres',
       group => 'postgres',
+      require => [ User['postgres'],  File["$yus_root"] ],
       mode => '0644',
-      require => File['/etc/yus'],
   }
     
   $yus_checkout = '/opt/src/yus'
   vcsrepo {  "$yus_checkout":
       ensure => present,
       provider => git,
-      owner => 'postgres',
-      group => 'postgres',
+      owner => 'vagrant',
+      group => 'vagrant',
       source => 'git://scm.ywesee.com/yus',
   }  
   
@@ -84,6 +67,7 @@ class oddb_org::yus(
     owner   => 'vagrant',
     group   => 'vagrant',
     mode => '0644',
+    require => Vcsrepo["$yus_checkout"],
   }
 
   file {'/usr/local/bin/sha256.rb':
@@ -102,17 +86,18 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     owner => 'postgres',
     group => 'postgres',
     mode  => 0554,
-    require => [Package['apache'], ],
+    require => [Package['apache'], User['postgres']],
   }
-  
+
   $yus_installed = "/usr/local/bin/yusd"
   exec{ "$yus_installed":
     command => "$yus_install_script && touch $yus_installed",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_install_script", '/etc/yus'], ],
+    require => [File["$yus_install_script", "$yus_root"], ],
     creates => "/usr/local/bin/yusd",
     user => 'root',
   }
+  File["$yus_install_script"] -> Exec["$yus_installed"]
 
   $yaml_content = "# Managed by puppet in module oddb_org/manifests/yus.pp
 root_name: ${root_name}
@@ -126,7 +111,7 @@ ssl_cert: /etc/yus/data/${username}_rsa.crt
       owner => 'root',
       group => 'root',
       mode => '0544',
-      require => File['/etc/yus'],
+      require => File["$yus_root"],
   }
 
   $rsa_certificate = "/etc/yus/data/${username}_rsa.crt"
@@ -134,6 +119,7 @@ ssl_cert: /etc/yus/data/${username}_rsa.crt
     command => "openssl req -new -x509 -key $rsa_keyfile -out $rsa_certificate -batch",
     creates => "$rsa_certificate",
     path => '/usr/local/bin:/usr/bin:/bin',
+    require => File["${yus_data}"],
   }
 
   $yus_db_create_script = '/usr/local/bin/yus_db_created.sh'
@@ -142,19 +128,36 @@ ssl_cert: /etc/yus/data/${username}_rsa.crt
 whoami
 dropuser yus
 dropdb yus
-createuser yus --superuser
+create user yus --superuser
 createdb yus
 exit",
       owner => 'postgres',
       group => 'postgres',
+      require => User['postgres'],
       mode => '0755',
   }
   $yus_db_created = "/etc/yus/data/yus_db_created.okay"
   exec{ "$yus_db_created":
     command => "$yus_db_create_script && touch $yus_db_created",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_db_create_script", '/etc/yus'], ],
+    require => [File["$yus_db_create_script", "$yus_root"], User['postgres'], ],
     creates => "$yus_db_created",
     user => 'postgres',
   }
+  
+  $yus_service = '/etc/init.d/yus'
+  file{ "$yus_service":
+    content => template("oddb_org/yus.erb"),
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
+  
+  service{"yus":
+    ensure => running,
+    hasrestart => true,
+    require => [Exec["$yus_db_created"], ],
+    subscribe  => File["$yus_service"],
+  }
+  
 }

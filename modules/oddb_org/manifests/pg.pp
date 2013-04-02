@@ -41,7 +41,7 @@ class oddb_org::pg inherits oddb_org {
     creates => "$pg_server_configured",
     require => Package['postgresql-server'],
     notify => Service['postgresql-8.4'],
-    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    path => "$path",
   }
   
   $pg_oddb_loaded = "/opt/pg_oddb_loaded.okay"
@@ -49,7 +49,7 @@ class oddb_org::pg inherits oddb_org {
     command => "$pg_oddb_db_load_script && touch $pg_oddb_loaded",
     creates => "$pg_oddb_loaded",
     require => Service['postgresql-8.4'],
-    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    path => "$path",
     timeout => 15*160, # max wait time in seconds, took just above default 5 minutes on my machine
   }
   
@@ -62,7 +62,7 @@ class oddb_org::pg inherits oddb_org {
     touch $okayPgCfg",
     creates => "$okayPgCfg",
     require => [Service ['postgresql-8.4'], ],
-    path => '/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin',
+    path => "$path",
     cwd => '/opt', # must have read access to it 
   }
   

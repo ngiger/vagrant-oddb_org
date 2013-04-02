@@ -1,10 +1,6 @@
 #!/bin/bash -v
-DBI_ROOT=/opt/dbi
-# RUBY_VERS=ruby-1.8.7-p357
-RUBY_VERS=ruby-1.9.3-p392
-
+DBI_ROOT=<%= scope.lookupvar('dbi_root') %> 
 if [ $? -ne 0 ] ; then exit 1; fi
-rvm list
 if [ -d $DBI_ROOT ] ; then echo $DBI_ROOT exists already
 else 
   git clone https://github.com/ngiger/ruby-dbi.git $DBI_ROOT

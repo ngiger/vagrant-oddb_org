@@ -1,0 +1,40 @@
+#!/sbin/runscript
+
+YUS_BINARY=<%= scope.lookupvar('yus_installed') %>
+YUS_PIDFILE=${YUS_PIDFILE:-/var/run/${SVCNAME}.pid}
+
+checkconfig() {
+  if [ ! -x $YUS_BINARY ] ; then
+    return 1
+  fi
+  eselect ruby set ruby18
+  return 0
+}
+
+start() {
+  checkconfig || return 1
+
+  ebegin "Starting ${SVCNAME}"
+  start-stop-daemon --start --exec "${YUS_BINARY}" \
+      --pidfile "${YUS_PIDFILE}" --make-pidfile  --background
+  eend $?
+}
+
+stop() {
+  if [ "${RC_CMD}" = "restart" ] ; then
+    checkconfig || return 1
+  fi
+
+  ebegin "Stopping ${SVCNAME}"
+  start-stop-daemon --stop --exec "${YUS_BINARY}" \
+      --pidfile "${YUS_PIDFILE}" --quiet
+  eend $?
+}
+
+reload() {
+  checkconfig || return 1
+  ebegin "Reloading ${SVCNAME}"
+  start-stop-daemon --signal HUP \
+      --exec "${YUS_BINARY}" --pidfile "${YUS_PIDFILE}"
+  eend $?
+}

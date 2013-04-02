@@ -394,7 +394,15 @@ Switching to pg (0.9.0) did not change anything. Therefore commited my changes. 
 h3. currency server
 
 
+h2. Start again with good basebox and without rvm/rbenv
 
+* Some patches to use also puppet librarian
+* patched veewee box to use pure funtoo puppet
+* 2 hours to fix some minor problems and waiting for emerge to finish
+* Status: 
+** yus and currency should run as services
+** bin/oddb still has problems
+* checked in changes and called vagrant reload to verify startup from scratch
 
 h1. DB für medi
 

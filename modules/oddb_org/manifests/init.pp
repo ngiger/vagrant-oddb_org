@@ -39,7 +39,15 @@ class oddb_org(
   $destination        = "/var/www",
   $pg_base_version    = '8.4.16',
   $pg_server_version  = '8.4.16-r1',
-  $ruby_version       = '1.9.3-p392',
+  $ruby_version       = '1.9.3',
+  # if we prepend with /usr/local/lib/rbenv/env/shims: rbenv would be activated, too
+  # next without rbenv
+  $path               = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin:/usr/x86_64-pc-linux-gnu/gcc-bin/4.6.3'
+  # puppet has a special version of ruby 1.9.3 installed using rbenv
+  # rbenv insists into adding export RUBYOPT='-rauto_gem' to /etc/profile.env
+  # when running ruby programs we have to add a RUBYOPT='' at the beginning of each shell which will call a ruby executable
+  # or via an environment parameter to the command
+  #  $path               = '/usr/local/lib/rbenv/env/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin:/usr/x86_64-pc-linux-gnu/gcc-bin/4.6.3:/usr/local/lib/rbenv/bin'
 ) {
     package{'apache': }
     package {'postgresql-base':
@@ -48,9 +56,10 @@ class oddb_org(
        
    file{'/etc/localtime':
       ensure => link,
-      target => '../usr/share/zoneinfo/Europe/Zurich',
+      target => '/usr/share/zoneinfo/Europe/Zurich',
       owner => 'root',
       group => 'root',
       mode  => 0555,
     }
+    
 }

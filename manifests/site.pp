@@ -1,1 +1,1 @@
-notify { "site.pp": }
+import "nodes/*.pp"

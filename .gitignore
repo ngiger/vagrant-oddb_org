@@ -1,1 +1,5 @@
 *~
+# Ignore the directories and files created by librarian-puppet.
+.tmp/
+.librarian/
+Puppetfile.lock

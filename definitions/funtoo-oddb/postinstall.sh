@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -v
 # based on http://www.funtoo.org/wiki/Funtoo_Linux_Installation
 
 ### SETTINGS ###
@@ -48,6 +48,10 @@ mkswap /dev/sda3
 swapon /dev/sda3
 mkfs.ext2 /dev/sda1
 mkfs.ext4 /dev/sda4
+
+# verify to be sure that partitions are okay
+sgdisk -v /dev/sda
+sgdisk -p /dev/sda
 
 # this is our chroot directory for the installation
 chroot=/mnt/gentoo
@@ -293,6 +297,28 @@ UsePAM yes
 UsePrivilegeSeparation sandbox
 DATAEOF
 
+if true
+then
+  # install rbenv, ruby and bundler via emerge
+chroot "$chroot" /bin/bash <<DATAEOF
+echo "Emerge niklaus puppet eix"
+emerge dev-libs/libyaml
+env-update && source /etc/profile
+emerge eix ruby:1.9 bundler puppet
+DATAEOF
+libtool --finish /usr/lib64
+
+chroot "$chroot" /bin/bash <<DATAEOF
+env-update && source /etc/profile
+echo "Testing niklaus puppet eix"
+which eix
+which puppet
+puppet --version
+ruby --version
+DATAEOF
+
+else
+
 # install rbenv, ruby and bundler. Configure rbenv for global usage so it's usable without home directory
 chroot "$chroot" /bin/bash <<DATAEOF
 cd /usr/local/lib
@@ -341,6 +367,7 @@ EOF
 # install required and desired gems
 gem install bundler chef puppet
 DATAEOF
+fi
 
 # install logger and cron
 chroot "$chroot" /bin/bash <<DATAEOF
@@ -358,7 +385,21 @@ source /etc/profile && \
 env-update && \
 grub-install --no-floppy /dev/sda && \
 boot-update
+# Patching the boot configuration as we have no initramfs
+cd /boot/grub
+mv grub.cfg grub.bkp
+awk '{sub(/real_root/,"root")};1' grub.bkp > grub.cfg
+cat grub.cfg
 DATAEOF
+
+### patch to make lib/vagrant/guest/gentoo.rb happy
+chroot "$chroot" /bin/bash <<DATAEOF
+echo "niklaus patching netif"
+cd /etc/init.d
+ln -s netif.lo net.lo
+ls -lrt net*
+DATAEOF
+
 
 ### CLEANUP TO SHRINK THE BOX ###
 
