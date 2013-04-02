@@ -10,10 +10,6 @@ class oddb_org::yus(
   $yus_data   = "/etc/yus/data"
 ) inherits oddb_org::pg {
 
-  if !defined(User['postgres']) {
-    user{'postgres':}     
-  }
-  
   package{'ruby-password':
     ensure => present,
   }
@@ -52,24 +48,6 @@ class oddb_org::yus(
       mode => '0644',
   }
     
-  $yus_checkout = '/opt/src/yus'
-  vcsrepo {  "$yus_checkout":
-      ensure => present,
-      provider => git,
-      owner => 'vagrant',
-      group => 'vagrant',
-      source => 'git://scm.ywesee.com/yus',
-  }  
-  
-  file {"$yus_checkout":
-    ensure => directory,
-    recurse => true,
-    owner   => 'vagrant',
-    group   => 'vagrant',
-    mode => '0644',
-    require => Vcsrepo["$yus_checkout"],
-  }
-
   file {'/usr/local/bin/sha256.rb':
       content => "#!/usr/bin/env ruby
 require 'digest/sha2'
@@ -87,13 +65,15 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     group => 'postgres',
     mode  => 0554,
     require => [Package['apache'], User['postgres']],
+    
   }
 
   $yus_installed = "/usr/local/bin/yusd"
   exec{ "$yus_installed":
     command => "$yus_install_script && touch $yus_installed",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_install_script", "$yus_root"], ],
+    require => [File["$yus_install_script", "$yus_root", "$yus_data"], ],
+    subscribe => File["$yus_install_script" ],
     creates => "/usr/local/bin/yusd",
     user => 'root',
   }
@@ -128,7 +108,7 @@ ssl_cert: /etc/yus/data/${username}_rsa.crt
 whoami
 dropuser yus
 dropdb yus
-create user yus --superuser
+createuser yus --superuser
 createdb yus
 exit",
       owner => 'postgres',
@@ -136,11 +116,11 @@ exit",
       require => User['postgres'],
       mode => '0755',
   }
-  $yus_db_created = "/etc/yus/data/yus_db_created.okay"
+  $yus_db_created = "$yus_data/yus_db_created.okay"
   exec{ "$yus_db_created":
     command => "$yus_db_create_script && touch $yus_db_created",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_db_create_script", "$yus_root"], User['postgres'], ],
+    require => [File["$yus_db_create_script", "$yus_root", "$yus_data"], User['postgres'], ],
     creates => "$yus_db_created",
     user => 'postgres',
   }
@@ -157,7 +137,9 @@ exit",
     ensure => running,
     hasrestart => true,
     require => [Exec["$yus_db_created"], ],
-    subscribe  => File["$yus_service"],
+    subscribe  => [ Exec["$yus_installed", "$yus_db_created",  "$yus_installed" ], 
+      File["$yus_service"] 
+    ],
   }
   
 }
