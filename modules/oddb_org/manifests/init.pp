@@ -54,6 +54,8 @@ class oddb_org(
       ensure => $pg_version,
     }  
        
+    user{'postgres':}     
+  
    file{'/etc/localtime':
       ensure => link,
       target => '/usr/share/zoneinfo/Europe/Zurich',

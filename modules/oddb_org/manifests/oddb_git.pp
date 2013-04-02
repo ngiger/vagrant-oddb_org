@@ -31,8 +31,9 @@ class oddb_org::oddb_git(
    
   package{ 'eselect-ruby': }
   $ruby_installed = '/opt/two_rubies_installed.okay'
+  # we need libyaml for YAML syck to work correctly
   exec { "$ruby_installed":
-    command => "emerge ruby:1.8  ruby:1.9 eselect-ruby && touch $ruby_installed",
+    command => "emerge libyaml ruby:1.8  ruby:1.9 eselect-ruby && touch $ruby_installed",
     creates => "$ruby_installed",
     path => "$path",
   }

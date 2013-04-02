@@ -12,8 +12,18 @@ cd $ODDB_HOME
 m=(dummy January February March April May June July August September October November December)
 nm=`expr $mm + 0`
 sudo -u postgres dropdb $DB_NAME
+if [ $? -ne 0 ] ; then exit 1; fi
 sudo -u postgres createdb -E UTF8 -T template0 $DB_NAME
-mkdir data/sql
+if [ $? -ne 0 ] ; then exit 1; fi
+mkdir -p data/sql
+mkdir -p /opt/downloads
+if [ ! -f $DB_FILE ] 
+then
+  wget --quiet http://pillbox.oddb.org/postgresql_database-oddb.org.ruby193-backup.gz -O $DB_FILE
+  if [ $? -ne 0 ] ; then exit 1; fi
+fi
+
 # scp ywesee@thinpower.ywesee.com:/var/backup/thinpower/db/postgresql/${m[nm]}-$yyyy/$yyyy-$mm-$dd/22\:00-postgresql_database-$DB_NAME-backup.gz data/sql/$DB_NAME.$yyyy$mm$dd.sql.gz
 cd data/sql
 zcat $DB_FILE | psql -U postgres $DB_NAME
+if [ $? -ne 0 ] ; then exit 1; fi
