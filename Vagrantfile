@@ -5,8 +5,7 @@
 # require 'vagrant-hiera'
 
 #boxUrl = 'http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box'
-#puts "Using boxUrl #{boxUrl}"
-boxName     = 'oddb-20130402'
+boxName     = 'funtoo-oddb'
 
 
 Vagrant::Config.run do |config|

@@ -120,7 +120,9 @@ exit",
   exec{ "$yus_db_created":
     command => "$yus_db_create_script && touch $yus_db_created",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_db_create_script", "$yus_root", "$yus_data"], User['postgres'], ],
+    require => [File["$yus_db_create_script", "$yus_root", "$yus_data"], User['postgres'],
+                Package['postgresql-server'],
+    ],
     creates => "$yus_db_created",
     user => 'postgres',
   }

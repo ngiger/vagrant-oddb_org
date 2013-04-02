@@ -6,19 +6,22 @@ h2. requirements
 h2. Setup
 
 * @git clone git://github.com/ngiger/vagrant-oddb_org.git@
-* created a a veewee basebox
+* created a vagrant basebox via veewee
 ** @git clone git://github.com/jedi4ever/veewee.git@
 ** @cd veewee@
 ** @bundle install@
-** @cp -rp ../vagrant-odd/definitions .@
+** @cp -rp ../vagrant-oddb_org/definitions .@
 ** @vagrant basebox build  funtoo-oddb@ # may take an hour or more
 ** @vagrant basebox export funtoo-oddb@
 ** @vagrant box add funtoo-oddb funtoo-oddb.box@
-** Test the result if you want with the following stope
-*** @vagrant init@
-*** @vagrant up@
-*** @vagrant ssh@
-* @cd ../vagrant-oddb_org@
-* @bundle install@
-* @vagrant up@  # will take half an hour or so
+* Now boot the basebox and install everything for oddb.org
+** @cd ../vagrant-oddb_org@
+** @bundle install@
+** @vagrant up@  # will take half an hour or so
 
+If you want to change the servername @oddb.niklaus.org@ you have to edit the following files
+* shell/main.sh # is run very early via vagrant
+* modules/oddb_org/manifests/apache.pp # part of the stuff installed
+* manifests/nodes/<yourhostame>.pp  # place a copy of manifests/sites/oddb.pp there
+
+(I have not yet found a way how to define this stuff in a single place)

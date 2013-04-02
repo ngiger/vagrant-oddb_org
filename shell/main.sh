@@ -2,7 +2,7 @@
 # from https://github.com/purple52/librarian-puppet-vagrant
 
 # Directory in which librarian-puppet should manage its modules directory
-PUPPET_DIR=/etc/puppet/
+if [ -d /vagrant ] ; then PUPPET_DIR=/vagrant ; else PUPPET_DIR=/etc/puppet ; fi
 
 # NB: librarian-puppet might need git installed. If it is not already installed
 # in your basebox, this will manually install it at this point using apt or yum
@@ -21,10 +21,10 @@ if [ ! -x $GIT ]; then
     fi
 fi
 
-cp /vagrant/Puppetfile $PUPPET_DIR
+if [ ! -d /vagrant ] ; then cp /vagrant/Puppetfile $PUPPET_DIR ; fi
 
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
-  gem install librarian-puppet
+  gem install --no-ri --no-rdoc librarian-puppet
   cd $PUPPET_DIR && librarian-puppet install --clean
 else
   cd $PUPPET_DIR && librarian-puppet update

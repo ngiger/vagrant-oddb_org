@@ -54,7 +54,10 @@ class oddb_org(
       ensure => $pg_version,
     }  
        
-    user{'postgres':}     
+    user{'postgres':
+      ensure => present,
+      system => true,
+    }     
   
    file{'/etc/localtime':
       ensure => link,

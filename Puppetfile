@@ -14,3 +14,4 @@
 forge "http://forge.puppetlabs.com"
 mod "puppetlabs/stdlib"
 mod "puppetlabs/vcsrepo"
+mod 'oddb_org', :path => './static-modules/oddb_org'
