@@ -70,7 +70,6 @@ class oddb_org::apache(
       # source => "git://scm.ywesee.com/oddb.org/.git ",
 #      require => [User['apache'],],
   }  
-  if (0 == 1) {
   $install_mod_ruby_script = '/usr/local/bin/install_mod_ruby.sh'
   file { "$install_mod_ruby_script":
     source => "puppet:///modules/oddb_org/install_mod_ruby.sh",
@@ -79,7 +78,7 @@ class oddb_org::apache(
     mode  => 0554,
     require => [Package['apache'], ],
   }
- 
+  if (0 == 1) { 
   $install_mod_ruby = '/opt/mod_ruby.okay'
   exec{"$install_mod_ruby":
     command => "sudo -i $install_mod_ruby_script && \
