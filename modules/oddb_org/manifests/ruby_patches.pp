@@ -20,7 +20,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => "$path",
   }
   
-  $csv_rb_patch = "/usr/local/share/cvs.rb.patch"
+  $csv_rb_patch = "/usr/local/share/csv.rb.patch"
   file{"$csv_rb_patch":
     source => "puppet:///modules/oddb_org/csv.rb.patch.20111123.txt",
     owner => 'root',
@@ -34,5 +34,21 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     require => Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
+
+  $columninfo_patched = "/opt/columninfo_rb_patched.okay"
+  $columninfo_rb_patch = "/usr/local/share/columninfo.rb.patch"
+  file{"$columninfo_rb_patch":
+    source => "puppet:///modules/oddb_org/columninfo.rb.patch.20111123.txt",
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
+  exec{ "$columninfo_patched":
+    command => "$apply_ruby_patch 1.9 lib/dbi/columninfo.rb $columninfo_rb_patch && touch $columninfo_patched",
+    creates => "$columninfo_patched",
+    require => Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ],
+    path => '/usr/local/bin:/usr/bin:/bin',
+  }
+
   
 }
