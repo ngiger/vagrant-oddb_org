@@ -1,36 +1,36 @@
-#!/bin/bash -v
-# Modified by Niklaus Giger, 2013 april first
+#!/bin/bash 
+# Modified by Niklaus Giger, 2013-04-02
 export ODDB_HOME=<%= foostatus = scope.lookupvar('ODDB_HOME') %>
-eselect ruby set ruby19
-echo PATH ist $PATH
 cd $ODDB_HOME
 pwd
 cp .git/refs/heads/master .git/ORIG_HEAD
 # cp -r /home/vagrant/oddb_setup/captcha data
-ruby bin/update_css
+ruby19 bin/update_css
 
-ruby -v
-gem list -i racc;  if [ $? -ne 0 ] ; then gem install racc; fi
-gem list racc
+# Here we compile some helper methods using ruby18, even when we
+# will use them afterwards with ruby19
+# Niklaus just does not want to patch too much!
+ruby18 -v
+gem18 list -i racc;  if [ $? -ne 0 ] ; then gem18 install racc; fi
+gem18 list racc
 cd data
 mkdir -p pdf
 cd quanty
 pwd
-ruby extconf.rb
+ruby18 extconf.rb
 if [ $? -ne 0 ] ; then exit 1; fi
 src=parse.y
 dst=lib/quanty/parse.rb
 tmp=lib/quanty/parse.backup
 rm -f $dst
 mkdir -p `dirname $dst`
-# TODO: how to make this clean ??
-# racc -E -o $dst $src
+racc -E -o $dst $src
 if [ $? -ne 0 ] ; then exit 1; fi
-# mv $dst $tmp
-# echo '# encoding: utf-8'  > $dst
-# echo $tmp >> $dst
+mv $dst $tmp
+echo '# encoding: utf-8'  > $dst
+cat $tmp >> $dst
 pwd
-# make
+make
 if [ $? -ne 0 ] ; then exit 1; fi
-# make install
+make install
 if [ $? -ne 0 ] ; then exit 1; fi
