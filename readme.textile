@@ -404,6 +404,34 @@ h2. Start again with good basebox and without rvm/rbenv
 ** bin/oddb still has problems
 * checked in changes and called vagrant reload to verify startup from scratch
 
+Status as per April 2 2013
+* yus and currency can be started as services and run (they don't have a default runlevels)
+* apache seems to start normally. One find the following line in the error_log @[Tue Apr 02 16:27:44 2013] [notice] Apache/2.2.24 (Unix) mod_ssl/2.2.24 OpenSSL/1.0.1d mod_ruby/1.3.0 Ruby/1.8.7(2012-10-12) configured -- resuming normal operations@
+* db-dump is loaded
+* doc/index.rbx is still rendered as a plain text file (whether using emerge mod_ruby or installing it with from source using ruby19)
+* @bin/oddb@ fails with the following error:
+
+bc. bin/oddbd 
+/usr/lib64/ruby/site_ruby/1.9.1/rubygems/custom_require.rb:36:in `require': iconv will be deprecated in the future, use String#encode instead.
+could not find htmlgrid.so, falling back to pure-ruby class
+racc/parser.rb:33: warning: already initialized constant Racc_Runtime_Version
+<..>
+/usr/local/lib64/ruby/gems/1.9.1/gems/dbd-pg-0.3.9/lib/dbd/pg/statement.rb:62:in `rescue in execute': ERROR:  relation "oddb_persistence_pointer" already exists (DBI::ProgrammingError)
+        from /usr/local/lib64/ruby/gems/1.9.1/gems/dbd-pg-0.3.9/lib/dbd/pg/statement.rb:37:in `execute'
+
+* dbi_test.rb fails with
+
+bc. ruby19 /usr/local/bin/dbi_test.rb 
+I am running ruby 1.9.3
+Available drivers=[]
+/usr/local/lib64/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi.rb:300:in `block in load_driver': Unable to load driver 'pg' (underlying error: wrong constant name pg) (DBI::InterfaceError)
+        from /usr/lib64/ruby/1.9.1/monitor.rb:211:in `mon_synchronize'
+        from /usr/local/lib64/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi.rb:242:in `load_driver'
+        from /usr/local/lib64/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi.rb:160:in `_get_full_driver'
+        from /usr/local/lib64/ruby/gems/1.9.1/gems/dbi-0.4.5/lib/dbi.rb:145:in `connect'
+        from /usr/local/bin/dbi_test.rb:10:in `<main>'
+
+
 h1. DB für medi
 
 Gemäss E-Mail
