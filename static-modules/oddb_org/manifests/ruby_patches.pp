@@ -65,4 +65,19 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
   
+  $row_patched = "/opt/row_rb_patched.okay"
+  $row_rb_patch = "/usr/local/share/row.rb.patch"
+  file{"$row_rb_patch":
+    source => "puppet:///modules/oddb_org/row.rb.patch.20111125.txt",
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
+  exec{ "$row_patched":
+    command => "$apply_ruby_patch 1.9 lib/row.rb $row_rb_patch && touch $row_patched",
+    creates => "$row_patched",
+    require => Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ],
+    path => '/usr/local/bin:/usr/bin:/bin',
+  }
+  
 }
