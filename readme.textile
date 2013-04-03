@@ -393,8 +393,9 @@ Switching to pg (0.9.0) did not change anything. Therefore commited my changes. 
 
 h3. currency server
 
+This was simple. look at @static-modules/oddb_org/manifests/currency.pp@
 
-h2. Start again with good basebox and without rvm/rbenv
+h2(2_April). Start again with good basebox and without rvm/rbenv
 
 * Some patches to use also puppet librarian
 * patched veewee box to use pure funtoo puppet
