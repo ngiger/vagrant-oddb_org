@@ -433,6 +433,13 @@ Available drivers=[]
         from /usr/local/bin/dbi_test.rb:10:in `<main>'
 
 
+h2(3 April). Make mod_ruby work
+
+Added @-D RUBY@ to @/etc/conf.d/apache2@. Using an augeas lens did not work with 20 minutes of work. Therefore resorted to create the file.
+
+Now going to @http://oddb.niklaus.org:55080@ redirects me to @http://oddb.niklaus.org:55080/resources/errors/appdown.html@
+
+
 h1. DB für medi
 
 Gemäss E-Mail
