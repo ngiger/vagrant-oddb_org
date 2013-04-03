@@ -50,7 +50,7 @@ class oddb_org::oddb_git(
 # TODO:    Package['postgresql-base'], 
     ],
   }
-  notify{ "Path ist $path":} 
+
   $oddb_setup_run = 'run_oddb_setup.sh'
   $oddb_setup_sh  = '/usr/local/bin/oddb_setup.sh'
   $oddb_setup_okay = '/opt/oddb_setup.okay'
@@ -67,12 +67,13 @@ class oddb_org::oddb_git(
     path => "$path",
     creates => $oddb_setup_okay,
     require => [  File[ "$oddb_setup_sh"], 
-        Exec["$ruby_installed"],
+        Exec["$ruby_installed", "$select_ruby_1_9"],
         Vcsrepo[$ODDB_HOME], 
         Service['postgresql-8.4'],
     ],
   }
   
+  if (0 == 1) { # install using a git checkout of dbi
 
   package{ 'zip': } # needed to rake dbi!
   
@@ -91,6 +92,8 @@ class oddb_org::oddb_git(
     path => "$path",
     require => [ File["$install_dbi_cmd"], ],
     creates => '/opt/dbi/gen_gem.okay',
+  }
+  } else {
   }
 
   file { "$ODDB_HOME/src/testenvironment.rb":

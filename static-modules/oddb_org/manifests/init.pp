@@ -40,6 +40,7 @@ class oddb_org(
   $pg_base_version    = '8.4.16',
   $pg_server_version  = '8.4.16-r1',
   $ruby_version       = '1.9.3',
+  $select_ruby_1_9    = 'eselect_ruby_1_9',
   # if we prepend with /usr/local/lib/rbenv/env/shims: rbenv would be activated, too
   # next without rbenv
   $path               = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin:/usr/x86_64-pc-linux-gnu/gcc-bin/4.6.3'
@@ -67,4 +68,12 @@ class oddb_org(
       mode  => 0555,
     }
     
+  $select_ruby_1_9_okay = "/opt/${select_ruby_1_9}.okay"
+  exec {"$select_ruby_1_9":
+    command => "eselect ruby set ruby19 && touch $select_ruby_1_9_okay",
+    user => 'root',
+    creates => "$select_ruby_1_9_okay",
+    path => "$path",
+  }
+  
 }

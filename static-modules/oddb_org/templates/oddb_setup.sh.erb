@@ -24,7 +24,7 @@ dst=lib/quanty/parse.rb
 tmp=lib/quanty/parse.backup
 rm -f $dst
 mkdir -p `dirname $dst`
-racc -E -o $dst $src
+ruby18 /usr/bin/racc -E -o $dst $src
 if [ $? -ne 0 ] ; then exit 1; fi
 mv $dst $tmp
 echo '# encoding: utf-8'  > $dst

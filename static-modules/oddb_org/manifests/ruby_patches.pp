@@ -50,5 +50,19 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
+  $statement_patched = "/opt/statement_rb_patched.okay"
+  $statement_rb_patch = "/usr/local/share/statement.rb.patch"
+  file{"$statement_rb_patch":
+    source => "puppet:///modules/oddb_org/statement.rb.patch.20111125.txt",
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
+  exec{ "$statement_patched":
+    command => "$apply_ruby_patch 1.9 lib/dbi/handles/statement.rb $statement_rb_patch && touch $statement_patched",
+    creates => "$statement_patched",
+    require => Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ],
+    path => '/usr/local/bin:/usr/bin:/bin',
+  }
   
 }

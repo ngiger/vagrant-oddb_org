@@ -1,0 +1,27 @@
+# encoding: utf-8
+require 'rspec/core'
+require 'rspec/core/rake_task'
+require 'fileutils'
+require 'rake/clean'
+
+task :default => :spec
+ 
+desc "Run all specs in spec directory"
+RSpec::Core::RakeTask.new(:spec)
+
+ScreenshotTarget = 'screenshots_done'
+desc "Mit watir oddb.niklaus.org testen"
+images = 'images'
+file ScreenshotTarget => [ :spec ] do
+  unless File.exists?(ScreenshotTarget)
+    okay = system('spec/smoketest.rb')
+    if okay then
+      out = File.open(ScreenshotTarget, 'w+')
+      out.puts "Watir-Tests did run successfully on #{Time.now}"    
+      out.puts "Created #{Dir.glob(images+'/*.png').size} screenshots in #{images}"
+    end
+  end
+end if false
+
+CLOBBER.include(ScreenshotTarget)
+CLOBBER.include(images)

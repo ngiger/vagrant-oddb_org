@@ -4,9 +4,15 @@ GEM
     archive-tar-minitar (0.5.2)
     childprocess (0.3.9)
       ffi (~> 1.0, >= 1.0.11)
+    commonwatir (4.0.0)
+    data_magic (0.14)
+      faker (>= 1.1.2)
+      yml_reader (>= 0.2)
     diff-lcs (1.2.2)
     erubis (2.7.0)
     facter (1.6.18)
+    faker (1.1.2)
+      i18n (~> 0.5)
     ffi (1.6.0)
     hiera (1.1.2)
       json_pure
@@ -20,9 +26,16 @@ GEM
     metaclass (0.0.1)
     mocha (0.13.3)
       metaclass (~> 0.0.1)
+    multi_json (1.7.2)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
+    page-object (0.8.7)
+      page_navigation (>= 0.7)
+      selenium-webdriver (>= 2.31.0)
+      watir-webdriver (>= 0.6.2)
+    page_navigation (0.7)
+      data_magic (>= 0.14)
     puppet (3.1.1)
       facter (~> 1.6)
       hiera (~> 1.0)
@@ -36,6 +49,12 @@ GEM
     rspec-mocks (2.13.0)
     rspec-puppet (0.1.6)
       rspec
+    rubyzip (0.9.9)
+    selenium-webdriver (2.31.0)
+      childprocess (>= 0.2.5)
+      multi_json (~> 1.0)
+      rubyzip
+      websocket (~> 1.0.4)
     thor (0.18.1)
     vagrant (1.0.7)
       archive-tar-minitar (= 0.5.2)
@@ -47,6 +66,13 @@ GEM
       net-scp (~> 1.0.4)
       net-ssh (~> 2.2.2)
     vagrant-hiera (0.4.0)
+    watir (4.0.2)
+      commonwatir (~> 4)
+      watir-webdriver
+    watir-webdriver (0.6.2)
+      selenium-webdriver (>= 2.18.0)
+    websocket (1.0.7)
+    yml_reader (0.2)
 
 PLATFORMS
   ruby
@@ -54,7 +80,9 @@ PLATFORMS
 DEPENDENCIES
   librarian-puppet
   mocha
+  page-object
   puppet
   rspec-puppet
   vagrant
   vagrant-hiera
+  watir

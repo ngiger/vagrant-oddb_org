@@ -439,6 +439,17 @@ Added @-D RUBY@ to @/etc/conf.d/apache2@. Using an augeas lens did not work with
 
 Now going to @http://oddb.niklaus.org:55080@ redirects me to @http://oddb.niklaus.org:55080/resources/errors/appdown.html@
 
+h2. Create some smoketest for the web application
+
+I added the following rspec tests using "watir":http://watir.com/.
+
+* Check title
+* Check that english, french and german language can be selected and the content changes accordingly
+* Check aspirin and inderal
+* Check that after at most 5 medicaments we run into the limitation
+
+They fail miserably (except the first one) with my URL @oddb.niklaus.org:55080@.  Using the environment variable ODDB_URL one can also test the official oddb website. E.g. @ODDB_URL=http://ch.oddb.org rake spec@. There all my 9 tests pass.
+
 
 h1. DB für medi
 

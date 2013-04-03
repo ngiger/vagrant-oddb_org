@@ -14,6 +14,7 @@ unless File.file?(path_to_patch_file)
   exit 1
 end
 
+system('updatedb')  # ensure that we have an uptodate view of the filesystem
 candidates = `locate #{file_to_patch} | grep #{ruby_version} | grep -v /src/`.split("\n")
 unless candidates.size == 1
   puts "Please specify a better pattern. We should find exactly one file, but found "

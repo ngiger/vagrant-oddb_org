@@ -6,6 +6,8 @@ gem 'librarian-puppet'
 group :test do
   gem 'mocha'
   gem 'rspec-puppet'
+  gem 'watir'
+  gem 'page-object'
   gem "vagrant"
   gem 'vagrant-hiera'
 #  gem 'hiera-gpg'
