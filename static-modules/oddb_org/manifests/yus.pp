@@ -68,16 +68,16 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     
   }
 
-  $yus_installed = "/usr/local/bin/yusd"
-  exec{ "$yus_installed":
-    command => "$yus_install_script && touch $yus_installed",
+  $service_location = "/usr/local/bin/yusd"
+  exec{ "$service_location":
+    command => "$yus_install_script && touch $service_location",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [File["$yus_install_script", "$yus_root", "$yus_data"], ],
     subscribe => File["$yus_install_script" ],
     creates => "/usr/local/bin/yusd",
     user => 'root',
   }
-  File["$yus_install_script"] -> Exec["$yus_installed"]
+  File["$yus_install_script"] -> Exec["$service_location"]
 
   $yaml_content = "# Managed by puppet in module oddb_org/manifests/yus.pp
 root_name: ${root_name}
@@ -121,7 +121,7 @@ exit",
     command => "$yus_db_create_script && touch $yus_db_created",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [File["$yus_db_create_script", "$yus_root", "$yus_data"], User['postgres'],
-                Package['postgresql-server'],
+                Service["postgresql-8.4"],
     ],
     creates => "$yus_db_created",
     user => 'postgres',
@@ -139,7 +139,7 @@ exit",
     ensure => running,
     hasrestart => true,
     require => [Exec["$yus_db_created"], ],
-    subscribe  => [ Exec["$yus_installed", "$yus_db_created",  "$yus_installed" ], 
+    subscribe  => [ Exec["$service_location", "$yus_db_created",  "$service_location" ], 
       File["$yus_service"] 
     ],
   }

@@ -22,6 +22,8 @@ class oddb_org::apache(
       require => [ Package['apache'], ],
   }
   
+  package{ 'sbsm':  provider => gem, }
+  
   # TODO: fix /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.0.7/lib
   # 02_oddb_vhost.conf.txt for Ruby 1.9.3 without Rockit 
   file { "/etc/apache2/vhosts.d/oddb.conf":
@@ -29,7 +31,7 @@ class oddb_org::apache(
     owner => 'apache',
     group => 'apache',
     mode  => 0554,
-    require => [Package['apache'], ],
+    require => [Package['apache', 'sbsm'], ],
     notify => Service['apache2'],
   }
   

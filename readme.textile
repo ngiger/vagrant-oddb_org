@@ -450,6 +450,47 @@ I added the following rspec tests using "watir":http://watir.com/.
 
 They fail miserably (except the first one) with my URL @oddb.niklaus.org:55080@.  Using the environment variable ODDB_URL one can also test the official oddb website. E.g. @ODDB_URL=http://ch.oddb.org rake spec@. There all my 9 tests pass.
 
+h2(4 April). Fixing errors starting from a fresh checkout
+
+* install_yus did not depend on service postgres-8.4
+* oddb.css missing
+* Apache did not start because of missing sbsm/trans_handler
+* Patching statement.rb failed with rejected hunk
+* Patching row.rb failed as the patch was not against the original source
+
+h3. Install nginx to serve resources
+
+I had to install nginx and add a redirection via "file":oddb.niklaus.org.nginx. Afterwards css worked and all images displayed correctly under http://oddb.niklaus.org.
+
+bc. sudo cp oddb.niklaus.org.nginx /etc/nginx/sites-enabled
+sudo /etc/init.d/nginx restart
+
+Most specs did run now. But the most important, namely displaying the found medicaments did not work. Found the following line in /var/log/apache2/error_log
+
+bc. [Thu Apr 04 12:47:44 2013] [error] [client 10.0.2.2] File does not exist: /var/www/oddb.org/doc/resources/dojo, referer: http://oddb.niklaus.org/
+
+Unpacked dojo-release-1.3.0.tar.gz into doc/resources/dojo fixed this problem.
+
+Restarted bin/oddbd by hand to see errors and found:
+
+bc. error in SBSM::Session#process: /
+NoMethodError
+undefined method `[]' for #<DRb::DRbUnknown:0x000000058c4808>
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:208:in `import_cookies'
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:360:in `process'
+/var/www/oddb.org/src/util/session.rb:117:in `process'
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:172:in `block in drb_process'
+<internal:prelude>:10:in `synchronize'
+error in SBSM::Session#process: /de/gcc
+NoMethodError
+undefined method `[]' for #<DRb::DRbUnknown:0x00000005e9d428>
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:208:in `import_cookies'
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:360:in `process'
+/var/www/oddb.org/src/util/session.rb:117:in `process'
+/usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:172:in `block in drb_process'
+<internal:prelude>:10:in `synchronize'
+
+
 
 h1. DB für medi
 

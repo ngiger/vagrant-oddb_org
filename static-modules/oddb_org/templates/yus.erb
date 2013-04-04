@@ -1,13 +1,12 @@
 #!/sbin/runscript
 
-YUS_BINARY=<%= scope.lookupvar('yus_installed') %>
+YUS_BINARY="<%= scope.lookupvar('service_location') %>"
 YUS_PIDFILE=${YUS_PIDFILE:-/var/run/${SVCNAME}.pid}
 
 checkconfig() {
   if [ ! -x $YUS_BINARY ] ; then
     return 1
   fi
-  eselect ruby set ruby18
   return 0
 }
 

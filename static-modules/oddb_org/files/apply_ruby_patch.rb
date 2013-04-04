@@ -15,13 +15,13 @@ unless File.file?(path_to_patch_file)
 end
 
 system('updatedb')  # ensure that we have an uptodate view of the filesystem
-candidates = `locate #{file_to_patch} | grep #{ruby_version} | grep -v /src/`.split("\n")
+candidates = `locate #{file_to_patch} | grep #{ruby_version} | egrep -v '/src/|.rej|.orig'`.split("\n")
 unless candidates.size == 1
   puts "Please specify a better pattern. We should find exactly one file, but found "
   pp candidates[0..3]
   exit 1
 end
 
-cmd = "patch -p1 #{candidates[0]} < #{path_to_patch_file}"
+cmd = "patch --force --forward -p1 #{candidates[0]} < #{path_to_patch_file}"
 system(cmd) ? exit(0) : exit(1)
 

@@ -42,7 +42,7 @@ class oddb_org::oddb_git(
   
   exec { 'bundle_oddb_org':
     command => "bundle install && touch install.okay",
-    creates => "$ODDB_HOME/install.okay",
+    creates => "/opt/oddb_bundle_install.okay",
     cwd => "$ODDB_HOME",
     path => "$path",
     require => [  Package['bundler', 'imagemagick', 'tmail'],
@@ -112,9 +112,19 @@ class oddb_org::oddb_git(
     require => [Package['apache'], ],
   }
   
-  # include oddb_org::apache
+  $service_location = "$ODDB_HOME/bin/oddbd"
+  $oddb_service = '/etc/init.d/oddb'
+  file{ "$oddb_service":
+    content => template("oddb_org/yus.erb"),
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
   
-# TODO: 
-#  include oddb_org::pg  
- 
+  service{"oddb":
+    ensure => running,
+    hasrestart => true,
+    require => [Exec["$oddb_setup_run"], ],
+  }
+   
 }

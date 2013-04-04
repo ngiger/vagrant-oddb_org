@@ -27,7 +27,7 @@ describe "ch.oddb.org" do
   before :all do
     @idx = 0
     @homeUrl ||= ENV['ODDB_URL']
-    @homeUrl ||= "oddb.niklaus.org:55080"
+    @homeUrl ||= "oddb.niklaus.org"
     @browser = Watir::Browser.new
   end
   
