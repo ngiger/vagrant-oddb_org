@@ -57,8 +57,10 @@ describe "ch.oddb.org" do
   end
   
   it "should find Aspirin" do
+    wait_until_text(@browser)
     @browser.text_field(:name, "search_query").set("Aspirin")
     @browser.button(:name, "search").click
+    wait_until_text(@browser)
     @browser.text.should match /Aspirin 500/
     @browser.text.should match /Aspirin Cardio 100/
     @browser.text.should match /Aspirin Cardio 300/
@@ -110,6 +112,12 @@ describe "ch.oddb.org" do
  
 end
 x=%(
+zum schnell von Hand testen
+require 'watir'
+@idx = 0
+@homeUrl ||= "oddb.niklaus.org"
+@browser = Watir::Browser.new
+@browser.goto @homeUrl
 
 class OddMain
   include PageObject

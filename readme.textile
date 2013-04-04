@@ -490,7 +490,7 @@ undefined method `[]' for #<DRb::DRbUnknown:0x00000005e9d428>
 /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib/sbsm/session.rb:172:in `block in drb_process'
 <internal:prelude>:10:in `synchronize'
 
-
+Installing sbsm version 1.0.5 fixed the problem.
 
 h1. DB für medi
 
