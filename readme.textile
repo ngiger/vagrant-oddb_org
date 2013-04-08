@@ -492,6 +492,33 @@ undefined method `[]' for #<DRb::DRbUnknown:0x00000005e9d428>
 
 Installing sbsm version 1.0.5 fixed the problem.
 
+h2(8 April). Cleaning up puppet files
+
+The following changes were made:
+* Use hiera to store sensitive information (mail, password) via (not checked-id file) @hieradata/private/config.yaml@
+* Install and configure ssmtp to send mail
+* Fixed problem, that yus was started with ruby19 instead of ruby18
+* Use a checkout of mod_ruby to install it for a ruby19 based apache2 mod_ruby
+* Use puppet module @domcleal/augeasproviders@ to add an entry into /etc/hosts. This permitted
+* Move hostname -> @private/config.yaml@
+* Added @git config --system user.email <info taken from private/config.yaml>@
+ 
+Next error (in apache2/error_log when navigating to http://oddb.niklaus.org/de/gcc/rss/channel/sl_introduction.rss):
+
+bc. [Mon Apr 08 20:57:34 2013] [error] [client 10.0.2.2] client denied by server configuration: /var/www/oddb.org/data/rss, referer: http://oddb.niklaus.org/
+
+Then I created a new user calling @yus_add_user niklaus.giger@hispeed.ch@. Afte entering the right password for the rootuser the command completed. Then I went web p/age to reset the password under @de/gcc/password_lost/@. This did not work and I got the following error in the process running bin/oddb
+
+bc. error in SBSM::Session#process: /de/gcc
+Errno::ECONNREFUSED
+Connection refused - connect(2)
+/var/www/oddb.org/src/util/smtp_tls.rb:11:in `initialize'
+/var/www/oddb.org/src/util/smtp_tls.rb:11:in `open'
+/var/www/oddb.org/src/util/smtp_tls.rb:11:in `block in do_start'
+/usr/lib64/ruby/1.9.1/timeout.rb:68:in `timeout'
+/usr/lib64/ruby/1.9.1/timeout.rb:99:in `timeout'
+
+
 h1. DB für medi
 
 Gemäss E-Mail
