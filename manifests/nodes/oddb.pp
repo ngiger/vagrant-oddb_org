@@ -5,3 +5,4 @@ include oddb_org::currency
 include oddb_org::oddb_git
 include oddb_org::yus
 include oddb_org::apache
+include oddb_org::mail

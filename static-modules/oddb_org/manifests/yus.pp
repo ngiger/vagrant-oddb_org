@@ -2,9 +2,9 @@
 # for ODDB.org
 
 class oddb_org::yus(
-  $username = 'niklaus',
-  $root_name = "niklaus@ywesee.com",
-  $root_pass = "ec74c79bb6e82b4a0a448f6a1134d8fd4fd3c6ff40fd7ec58adee9805c757c24",
+  $username     = hiera('::oddb_org::username', 'dummy_user')
+  $root_name    = hiera('::oddb_org::root_name', 'dummy_root')
+  $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash')
   $yus_ruby_version = '1.8.7_p371',
   $yus_root   = "/etc/yus",
   $yus_data   = "/etc/yus/data"
@@ -65,7 +65,6 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     group => 'postgres',
     mode  => 0554,
     require => [Package['apache'], User['postgres']],
-    
   }
 
   $service_location = "/usr/local/bin/yusd18"

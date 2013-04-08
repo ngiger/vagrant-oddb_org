@@ -2,13 +2,11 @@
 # for ODDB.org
 
 class oddb_org::apache(
-  $server_name = 'oddb.niklaus.org'
 ) inherits oddb_org {
   include oddb_org::oddb_git
-  
+
   # we need an apache installation
   #  class {'apache':  } # puppetlabs-apache does not work on gentoo
-#    package{'apache': }
     service{'apache2':
       ensure => running,
       require => [ Package['apache'], ],
@@ -45,7 +43,7 @@ class oddb_org::apache(
   
   
  file { "/var/www/localhost/htdocs/index.html":
-    content => " <html><body><h1>It works. Serving localhost (not server $server_name)!</h1></body></html>",
+    content => " <html><body><h1>It works. Serving localhost (not server ${::oddb_org::server_name})!</h1></body></html>",
     owner => 'apache',
     group => 'apache',
     mode  => 0554,
@@ -80,7 +78,6 @@ class oddb_org::apache(
     mode  => 0554,
     require => [Package['apache'], ],
   }
-  if (0 == 1) { 
   $install_mod_ruby = '/opt/mod_ruby.okay'
   exec{"$install_mod_ruby":
     command => "sudo -i $install_mod_ruby_script && \
@@ -89,7 +86,7 @@ class oddb_org::apache(
     path => "$path",
     require => File["$install_mod_ruby_script"],
    }
-   }
+   
    package{ "ruby-augeas":
     provider => portage,
     ensure => installed,
@@ -124,11 +121,4 @@ $key=\"$value\"
     }
   }
   
-  package{'mod_ruby':
-#  require => File["$apache2_conf"],
-  }
-  # TODO: Added to /etc/hosts
-  # 10.0.2.15       oddb.niklaus.org
-  # changed in /etc/apache2/vhosts.d/oddb
-  # oddb.zeno.org -> oddb.niklaus.org
 }

@@ -13,7 +13,7 @@ LoadModule ruby_module /usr/lib/apache2/modules/mod_ruby.so
 
 <VirtualHost *:80>
   DocumentRoot /var/www/oddb.org/doc
-  ServerName <%= foostatus = scope.lookupvar('server_name') %> 
+  ServerName <%= foostatus = scope.lookupvar('::oddb_org::server_name') %> 
   DirectoryIndex index.rbx
   RubyAddPath /var/www/oddb.org/src
   RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>

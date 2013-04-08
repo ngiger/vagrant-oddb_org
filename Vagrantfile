@@ -5,7 +5,8 @@
 
 #boxUrl = 'http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box'
 boxName     = 'funtoo-oddb'
-
+require 'yaml'
+hieraCfg = YAML.load(File.open( 'hieradata/private/config.yaml' ) )
 
 Vagrant::Config.run do |config|
   # Setup the box
@@ -15,9 +16,9 @@ Vagrant::Config.run do |config|
   # Boot with a GUI so you can see the screen. (Default is headless)
   config.vm.boot_mode = :gui
   config.vm.provision :puppet, :options => "--debug"
+  config.vm.network :hostonly, hieraCfg['::oddb_org::ip']
 
   config.vm.provision :puppet do |puppet|
-  
     # This shell provisioner installs librarian-puppet and runs it to install
     # puppet modules. This has to be done before the puppet provisioning so that
     # the modules are available when puppet tries to parse its manifests.
@@ -41,7 +42,7 @@ Vagrant::Config.run do |config|
   end
   
   
-  config.vm.host_name = "oddb.niklaus.org"
+  config.vm.host_name     = hieraCfg['::oddb_org::hostname']
   config.vm.forward_port   22, 55022    # ssh
   config.vm.forward_port   80, 55080    # apache
   

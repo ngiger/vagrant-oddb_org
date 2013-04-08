@@ -15,13 +15,6 @@ class oddb_org::mail(
     mode => '0644',
   }
   
-  file { '/etc/puppet/private/config.yaml':
-    source => "puppet:///modules/private/config.yaml",
-    owner => 'root',
-    group => 'root',
-    mode => '0644',
-  }
-
   file { '/etc/ssmtp/revaliases':
   content => "# Managed by puppet oddb_org/manifests/mail.pp
 root:${email_user}

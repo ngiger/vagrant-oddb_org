@@ -30,8 +30,3 @@ else
   cd $PUPPET_DIR && librarian-puppet update
 fi
 
-grep 10.0.2.15 /etc/hosts
-if [ $? -ne 0 ]
-then
-  echo 10.0.2.15 oddb.niklaus.org oddb >> /etc/hosts
-fi
