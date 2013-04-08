@@ -2,10 +2,9 @@
 # for ODDB.org
 
 class oddb_org::currency(
-  $username = 'niklaus',
-  $root_name = "niklaus@ywesee.com",
-  $root_pass = "ec74c79bb6e82b4a0a448f6a1134d8fd4fd3c6ff40fd7ec58adee9805c757c24",
-  $currency_installed    = "/usr/local/bin/currencyd"
+  $username     = hiera('::oddb_org::username', 'dummy_user'),
+  $root_name    = hiera('::oddb_org::root_name', 'dummy_root'),
+  $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash'),
 ) inherits oddb_org {
   # at the moment we assume it as installed!
 
@@ -21,18 +20,20 @@ class oddb_org::currency(
       # TODO: require => [User['apache'],],
   }  
    
-  exec{ "$currency_installed":
+  $service_location = "/usr/local/bin/currencyd"
+  exec{ "$service_location":
     command => "gem install ycurrency",
     path => '/usr/local/bin:/usr/bin:/bin',
-    creates => $currency_installed,
+    creates => $service_location,
   }
   
   $currency_service = '/etc/init.d/currency'
   file{ "$currency_service":
-    content => template("oddb_org/currency.erb"),
+    content => template("oddb_org/service.erb"),
     owner => 'root',
     group => 'root',
     mode  => 0755,
+    require => Exec["$service_location"],
   }
   
   service{"currency":

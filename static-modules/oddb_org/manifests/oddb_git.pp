@@ -115,7 +115,7 @@ class oddb_org::oddb_git(
   $service_location = "$ODDB_HOME/bin/oddbd"
   $oddb_service = '/etc/init.d/oddb'
   file{ "$oddb_service":
-    content => template("oddb_org/yus.erb"),
+    content => template("oddb_org/service.erb"),
     owner => 'root',
     group => 'root',
     mode  => 0755,
@@ -124,7 +124,7 @@ class oddb_org::oddb_git(
   service{"oddb":
     ensure => running,
     hasrestart => true,
-    require => [Exec["$oddb_setup_run"], ],
+    require => [Exec["$oddb_setup_run"], File["$oddb_service"], ],
   }
    
 }

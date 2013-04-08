@@ -2,10 +2,9 @@
 # for ODDB.org
 
 class oddb_org::yus(
-  $username     = hiera('::oddb_org::username', 'dummy_user')
-  $root_name    = hiera('::oddb_org::root_name', 'dummy_root')
-  $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash')
-  $yus_ruby_version = '1.8.7_p371',
+  $username   = hiera('::oddb_org::username', 'dummy_user'),
+  $root_name  = hiera('::oddb_org::root_name', 'dummy_root'),
+  $root_pass  = hiera('::oddb_org::root_hash', 'dummy_root_hash'),
   $yus_root   = "/etc/yus",
   $yus_data   = "/etc/yus/data"
 ) inherits oddb_org::pg {
@@ -135,7 +134,7 @@ exit",
   
   $yus_service = '/etc/init.d/yus'
   file{ "$yus_service":
-    content => template("oddb_org/yus.erb"),
+    content => template("oddb_org/service.erb"),
     owner => 'root',
     group => 'root',
     mode  => 0755,
