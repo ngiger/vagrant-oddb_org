@@ -1,0 +1,13 @@
+ ---
+  url_bag_sl_zip:
+  "http://bag.e-mediat.net/SL2007.Web.External/File.axd?file=XMLPublications.zip"
+  smtp_server: smtp.gmail.com
+  smtp_domain: ywesee.com
+  smtp_user: mhatakeyama@ywesee.com
+  smtp_pass: xxxx
+  smtp_port: 587
+  mail_from: '"masa" <mhatakeyama@ywesee.com>'
+  mail_to:
+    - 'mhatakeyama@ywesee.com'
+  text_info_searchform: 'http://www.kompendium.ch/Search.aspx?lang=de'
+  text_info_newssource: 'http://www.documedinfo.ch/content/page_1.aspx'

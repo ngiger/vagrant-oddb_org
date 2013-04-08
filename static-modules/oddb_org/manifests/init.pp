@@ -55,11 +55,20 @@ class oddb_org(
       ensure => $pg_version,
     }  
        
+    file { '/etc/puppet/hiera.yaml':
+      ensure => link,
+      target => '/etc/puppet/hieradata/hiera.yaml',
+      owner => 'root',
+      group => 'root',
+      mode  => 0444,
+    }
+    
     user{'postgres':
       ensure => present,
       system => true,
     }     
   
+    
    file{'/etc/localtime':
       ensure => link,
       target => '/usr/share/zoneinfo/Europe/Zurich',

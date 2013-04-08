@@ -10,19 +10,19 @@
 ---
 :backends: 
   - yaml
-  - gpg
+#  - gpg
 :yaml:
-  :datadir: /etc/puppet
+  :datadir: /etc/puppet/hieradata
 :hierarchy:
   - private/%{::environment}
 # we use here hostname as we don't have a valid clientcert  
   - private/%{::hostname}
   - private/config
-  - hieradata/common
+  - common
 :logger: console
 :gpg:
-   :datadir: /etc/puppet/data
+   :datadir: /etc/puppet/hieradata
    # Optional, defaults to ~/.gnupg
-   :key_dir: /etc/puppet/gpg
-   # :key_dir: /home/niklaus/.gnupg
+   :key_dir: /etc/puppet/hieradata/gpg
+
 

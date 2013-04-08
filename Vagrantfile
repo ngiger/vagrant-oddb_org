@@ -2,7 +2,6 @@
 # Copyright (c) Niklaus Giger, <niklaus.giger@member.fsf.org>
 # License: GPLv2
 # Boxes are stored under ~/.vagrant.d/boxes/
-# require 'vagrant-hiera'
 
 #boxUrl = 'http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box'
 boxName     = 'funtoo-oddb'
@@ -30,12 +29,17 @@ Vagrant::Config.run do |config|
     puppet.manifest_file  = "site.pp"
     puppet.module_path    = "modules"
   end
-
-  if defined?(config.hiera)
-    config.hiera.config_path = '.'
-    config.hiera.config_file = 'vagrant_hiera.yaml'
-    config.hiera.data_path   = '.'    
-  end if false
+  
+  if false
+    # I cannot use the following three lines as specified by https://github.com/gposton/vagrant-hieradata
+    # because this lead to trying to install apt usinge puppetlabs repository  
+    #  config.hiera.config_path = File.join(Dir.pwd, 'hieradata')
+    #  config.hiera.config_file = 'hiera.yaml'
+    #  config.hiera.data_path   = File.join(Dir.pwd, 'hieradata')
+  else # use my workaround
+    config.vm.share_folder "hieradata", "/etc/puppet/hieradata", File.join(Dir.pwd, 'hieradata')
+  end
+  
   
   config.vm.host_name = "oddb.niklaus.org"
   config.vm.forward_port   22, 55022    # ssh

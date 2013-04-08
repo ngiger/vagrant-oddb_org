@@ -14,6 +14,13 @@ h2. Setup
 ** @vagrant basebox build  funtoo-oddb@ # may take an hour or more
 ** @vagrant basebox export funtoo-oddb@
 ** @vagrant box add funtoo-oddb funtoo-oddb.box@
+* Setup your email smtp
+* @mkdir hieradata/private@
+* Your @hieradata/private/config.yaml@ should like this (we assume a SMTP with TLS):
+bc. "::oddb_org::mail::smtp_host":  smtp.provider.net:port
+"::oddb_org::mail::user":       user.account@provider.net
+"::oddb_org::mail::password":   topsecret_password
+ 
 * Now boot the basebox and install everything for oddb.org
 ** @cd ../vagrant-oddb_org@
 ** @bundle install@

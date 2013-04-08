@@ -68,11 +68,18 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     
   }
 
-  $service_location = "/usr/local/bin/yusd"
+  $service_location = "/usr/local/bin/yusd18"
+  file {"$service_location":
+    source => "puppet:///modules/oddb_org/yusd18",
+      owner => 'root',
+      group => 'root',
+      mode => '0755',
+  }
+
   exec{ "$service_location":
     command => "$yus_install_script && touch $service_location",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [File["$yus_install_script", "$yus_root", "$yus_data"], ],
+    require => [File["$yus_install_script", "$yus_root", "$yus_data", "$service_location"], ],
     subscribe => File["$yus_install_script" ],
     creates => "/usr/local/bin/yusd",
     user => 'root',
