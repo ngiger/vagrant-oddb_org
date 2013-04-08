@@ -16,8 +16,7 @@ Vagrant::Config.run do |config|
   # Boot with a GUI so you can see the screen. (Default is headless)
   config.vm.boot_mode = :gui
   config.vm.provision :puppet, :options => "--debug"
-  config.vm.network :hostonly, hieraCfg['::oddb_org::ip']
-
+  
   config.vm.provision :puppet do |puppet|
     # This shell provisioner installs librarian-puppet and runs it to install
     # puppet modules. This has to be done before the puppet provisioning so that
@@ -41,7 +40,9 @@ Vagrant::Config.run do |config|
     config.vm.share_folder "hieradata", "/etc/puppet/hieradata", File.join(Dir.pwd, 'hieradata')
   end
   
-  
+
+  # cannot specify an ip. Only works with the default of 10.0.2.15 of vagrant
+  #  config.vm.network :hostonly, hieraCfg['::oddb_org::ip']
   config.vm.host_name     = hieraCfg['::oddb_org::hostname']
   config.vm.forward_port   22, 55022    # ssh
   config.vm.forward_port   80, 55080    # apache
