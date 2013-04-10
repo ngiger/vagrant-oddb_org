@@ -48,6 +48,13 @@ class oddb_org(
   $oddb_group         = 'oddb',
   $inst_logs          = '/opt/logs'
 ) {
+
+    if !defined(User['apache']) {
+      user{'apache': require => Package['apache']}
+    }
+    if !defined(Group['apache']) {
+      group{'apache': require => Package['apache']}
+    }
     package{['apache', 
       'etckeeper',  # nice to have a git based history of the /etc 
       'htop',       # Niklaus likes it better than top

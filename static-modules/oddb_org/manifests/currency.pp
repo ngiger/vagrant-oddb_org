@@ -5,7 +5,7 @@ class oddb_org::currency(
   $username     = hiera('::oddb_org::username', 'dummy_user'),
   $root_name    = hiera('::oddb_org::root_name', 'dummy_root'),
   $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash'),
-) inherits oddb_org {
+) inherits oddb_org::init {
   # at the moment we assume it as installed!
 
   $currency_repo = '/opt/src/ycurrency'
@@ -17,7 +17,7 @@ class oddb_org::currency(
       source => 'git://scm.ywesee.com/currency',
       # cloning via git did not work!
       # source => "git://scm.ywesee.com/oddb.org/.git ",
-      # TODO: require => [User['apache'],],
+      require => [User['apache'],],
   }  
    
   $service_location = "/usr/local/bin/currencyd"

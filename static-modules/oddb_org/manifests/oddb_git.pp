@@ -6,12 +6,6 @@ class oddb_org::oddb_git(
   $SETUP_DIR = '/home/vagrant/oddb_setup',
 ) inherits oddb_org::pg {
   
-  if !defined(User['apache']) {
-    user{'apache': require => Package['apache']}
-  }
-  if !defined(Group['apache']) {
-    group{'apache': require => Package['apache']}
-  }
   vcsrepo {  "$ODDB_HOME":
       ensure => present,
       provider => git,
