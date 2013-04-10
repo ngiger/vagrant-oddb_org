@@ -21,6 +21,9 @@ class oddb_org::currency(
   }  
    
   $service_location = "/usr/local/bin/currencyd"
+  $service_depend   = ""
+  $service_user     = "$oddb_user"
+  
   exec{ "$service_location":
     command => "gem install ycurrency",
     path => '/usr/local/bin:/usr/bin:/bin',
@@ -39,6 +42,7 @@ class oddb_org::currency(
   service{"currency":
     ensure => running,
     hasrestart => true,
+    require    => File["$currency_service"],
     subscribe  => File["$currency_service"],
   }
 }

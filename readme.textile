@@ -1,3 +1,5 @@
+{toc:style=disc|maxLevel=3}
+
 h1. Eays setup to ODDB.org
 
 Goal: "Setup":http://dev.ywesee.com/Choddb/SetupOddborg#StartHere of oddb.org should be easy and automatated.
@@ -517,6 +519,15 @@ Connection refused - connect(2)
 /var/www/oddb.org/src/util/smtp_tls.rb:11:in `block in do_start'
 /usr/lib64/ruby/1.9.1/timeout.rb:68:in `timeout'
 /usr/lib64/ruby/1.9.1/timeout.rb:99:in `timeout'
+
+h2(10 April). Proper setup of yus/oddb.yml
+
+Added a script to generate the /etc/yus/yus.yml and granting all necessary rights for the root user.
+Was a little bit tricky to get all the dependencies in the puppet right. (E.g. had to add in the oddb_org/manifests/*.pp a few only_if and subscribe/notify)
+
+Using Zeno's information I changed all ODDB-Service to run under the apache user and changed a few owner accordingly.
+
+After adding the correct information under @/var/www/oddb/etc/oddb.yml@ and restarting the oddb service I was able to reset my password without any problem. Logout/login worked too.
 
 
 h1. DB für medi

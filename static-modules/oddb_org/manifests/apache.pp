@@ -70,6 +70,7 @@ class oddb_org::apache(
       # source => "git://scm.ywesee.com/oddb.org/.git ",
 #      require => [User['apache'],],
   }  
+  
   $install_mod_ruby_script = '/usr/local/bin/install_mod_ruby.sh'
   file { "$install_mod_ruby_script":
     source => "puppet:///modules/oddb_org/install_mod_ruby.sh",
@@ -78,20 +79,16 @@ class oddb_org::apache(
     mode  => 0554,
     require => [Package['apache'], ],
   }
-  $install_mod_ruby = '/opt/mod_ruby.okay'
+  $install_mod_ruby = "$inst_logs/mod_ruby.okay"
   exec{"$install_mod_ruby":
     command => "sudo -i $install_mod_ruby_script && \
     touch $install_mod_ruby",
-    creates => "$install_mod_ruby",
+#    creates => "$install_mod_ruby",
     path => "$path",
     require => File["$install_mod_ruby_script"],
+    onlyif  => "/usr/bin/diff $install_mod_ruby /usr/lib64/apache2/modules/mod_ruby.so; /usr/bin/test $? -ne 0",
    }
    
-   package{ "ruby-augeas":
-    provider => portage,
-    ensure => installed,
-    }
-    
   $apache2_conf = '/etc/conf.d/apache2'
   $key          = 'APACHE2_OPTS'
   $value        = '-D RUBY -D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE'
@@ -103,6 +100,11 @@ class oddb_org::apache(
 # Debug: Augeas[/etc/conf.d/apache2](provider=augeas): sending command 'set' with params ["/files/etc/conf.d/apache2/APACHE2_OPTSxx", "=-D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE -D RUBY"]  
     Package["ruby-augeas"] -> Augeas <| |>
 
+   package{ "ruby-augeas":
+    provider => portage,
+    ensure => installed,
+    }
+    
     augeas { "$apache2_conf":
       context => "/files${apache2_conf}",
       lens    => "Puppet.lns",

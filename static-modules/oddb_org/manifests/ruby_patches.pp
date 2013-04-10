@@ -2,7 +2,7 @@
 
 class oddb_org::ruby_patches inherits oddb_org::oddb_git {
   
-  $csv_patched = "/opt/csv_rb_patched.okay"
+  $csv_patched = "$inst_logs/csv_rb_patched.okay"
   $apply_ruby_patch = "/usr/local/bin/apply_ruby_patch.rb"
   
   file{"$apply_ruby_patch":
@@ -12,7 +12,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     mode  => 0755,
   }
   
-  $locate_installed_and_init = '/opt/locate_installed_and_init.okay'
+  $locate_installed_and_init = "$inst_logs/locate_installed_and_init.okay"
   exec{"$locate_installed_and_init":
     creates => "$locate_installed_and_init",
     command => "emerge mlocate && updatedb && touch $locate_installed_and_init",
@@ -35,7 +35,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
-  $columninfo_patched = "/opt/columninfo_rb_patched.okay"
+  $columninfo_patched = "$inst_logs/columninfo_rb_patched.okay"
   $columninfo_rb_patch = "/usr/local/share/columninfo.rb.patch"
   file{"$columninfo_rb_patch":
     source => "puppet:///modules/oddb_org/columninfo.rb.patch.20111123.txt",
@@ -50,7 +50,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
-  $statement_patched = "/opt/statement_rb_patched.okay"
+  $statement_patched = "$inst_logs/statement_rb_patched.okay"
   $statement_rb_patch = "/usr/local/share/statement.rb.patch"
   file{"$statement_rb_patch":
     source => "puppet:///modules/oddb_org/statement.rb.patch.20111125.txt",
@@ -65,7 +65,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
   
-  $row_patched = "/opt/row_rb_patched.okay"
+  $row_patched = "$inst_logs/row_rb_patched.okay"
   $row_rb_patch = "/usr/local/share/row.rb.patch"
   file{"$row_rb_patch":
     source => "puppet:///modules/oddb_org/row.rb.patch.20111125.txt",

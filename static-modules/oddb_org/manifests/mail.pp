@@ -43,13 +43,31 @@ FromLineOverride=Yes
     mode => '0644',    
     require => Package[$mail_package],
 }
+  $oddb_yml = "$ODDB_HOME/etc/oddb.yml"
+  file {"$oddb_yml" :
+    content => "# Managed by puppet oddb_org/manifests/mail.pp
+smtp_server: ${mail_smtp_host}
+smtp_domain: ywesee.com
+smtp_user: ${email_user}
+smtp_pass: ${email_password}
+smtp_port: 587
+",
+    owner => 'root',
+    group => 'root',
+    mode => '0644',    
+    require => Package[$mail_package],
+}
   
+
   # test_enrionments reads email_address via git. Therefore we need configure git for it
-  $mail_configured = "/opt/mail_server.okay"
+  $mail_configured = "$inst_logs/mail_server.okay"
   exec{ "$mail_configured":
-    command => "git config --global user.email $email_user && touch $mail_configured",
+    command => "/bin/bash -c 'export HOME=$inst_logs && git config --global user.email $email_user && touch $mail_configured'",
     creates => "$mail_configured",
     path => "$path",
+    user => "$oddb_user",
+    cwd => "$inst_logs",
+    require => File[$inst_logs, $oddb_yml],
   }
   
 }

@@ -3,7 +3,6 @@
 class { 'git': }
 
 class oddb_org::oddb_git(
-  $ODDB_HOME = '/var/www/oddb.org',
   $SETUP_DIR = '/home/vagrant/oddb_setup',
 ) inherits oddb_org::pg {
   
@@ -16,8 +15,8 @@ class oddb_org::oddb_git(
   vcsrepo {  "$ODDB_HOME":
       ensure => present,
       provider => git,
-      owner => 'apache',
-      group => 'apache',
+      owner => "$oddb_user",
+      group => "apache",
       source => 'https://github.com/ngiger/oddb.org.git',
       # source => 'https://github.com/zdavatz/oddb.org.git',
       # cloning via git did not work!
@@ -25,12 +24,30 @@ class oddb_org::oddb_git(
       require => [User['apache'],],
   }  
   
+  file {"$ODDB_HOME/doc":
+    ensure  => directory,
+#    recurse => true,
+    owner => "$oddb_user",
+    group => "apache",
+    mode    => 0664, # must bewritable for oddb services and apache
+    require => Vcsrepo["$ODDB_HOME"],
+  }
+  
+  file {"$ODDB_HOME/data":
+    ensure  => directory,
+#    recurse => true,
+    owner => "$oddb_user",
+    group => "apache",
+    mode    => 0664, # must bewritable for oddb services and apache
+    require => Vcsrepo["$ODDB_HOME"],
+  }
+  
   package{ 'bundler':  provider => gem, }
    
   package{ 'tmail': provider => portage }
    
   package{ 'eselect-ruby': }
-  $ruby_installed = '/opt/two_rubies_installed.okay'
+  $ruby_installed = "$inst_logs/two_rubies_installed.okay"
   # we need libyaml for YAML syck to work correctly
   exec { "$ruby_installed":
     command => "emerge libyaml ruby:1.8  ruby:1.9 eselect-ruby && touch $ruby_installed",
@@ -42,7 +59,7 @@ class oddb_org::oddb_git(
   
   exec { 'bundle_oddb_org':
     command => "bundle install && touch install.okay",
-    creates => "/opt/oddb_bundle_install.okay",
+    creates => "$inst_logs/oddb_bundle_install.okay",
     cwd => "$ODDB_HOME",
     path => "$path",
     require => [  Package['bundler', 'imagemagick', 'tmail'],
@@ -53,7 +70,7 @@ class oddb_org::oddb_git(
 
   $oddb_setup_run = 'run_oddb_setup.sh'
   $oddb_setup_sh  = '/usr/local/bin/oddb_setup.sh'
-  $oddb_setup_okay = '/opt/oddb_setup.okay'
+  $oddb_setup_okay = "$inst_logs/oddb_setup.okay"
   file { "$oddb_setup_sh":
     content => template('oddb_org/oddb_setup.sh.erb'),
     owner => 'root',
@@ -113,7 +130,9 @@ class oddb_org::oddb_git(
   }
   
   $service_location = "$ODDB_HOME/bin/oddbd"
-  $oddb_service = '/etc/init.d/oddb'
+  $oddb_service     = '/etc/init.d/oddb'
+  $service_user     = "$oddb_user"
+
   file{ "$oddb_service":
     content => template("oddb_org/service.erb"),
     owner => 'root',
