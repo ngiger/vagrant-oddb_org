@@ -2,7 +2,7 @@
 
 class { 'git': }
 
-class oddb_org::pg inherits oddb_org::init {
+class oddb_org::pg inherits oddb_org {
 # puppetlabs-postgresql fails on funtoo
 #  class { 'postgresql':
 #    version => '8.4', # could not install 8.4.2, neither 8.4.9

@@ -67,15 +67,6 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
       mode => 0755,
   }
 
-  exec{"yus_onlyif_1":
-        command => "/bin/grep ruby $service_location > $inst_logs/yus_onlyif_1",
-        onlyif => [
-          # run command if ruby19 specified or $service_location is not yet present
-          "/bin/grep ruby19 $service_location; /usr/bin/test $? -eq 0 -o ! -f $service_location",
-          ],
-        path => "$path",
-  }
-
   $yus_installed_okay = "$inst_logs/yus_installed.okay2"
   exec{ "$yus_install_script":
     command => "$yus_install_script && touch $yus_installed_okay",
