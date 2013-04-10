@@ -44,7 +44,9 @@ Vagrant::Config.run do |config|
   # cannot specify an ip. Only works with the default of 10.0.2.15 of vagrant
   #  config.vm.network :hostonly, hieraCfg['::oddb_org::ip']
   config.vm.host_name     = hieraCfg['::oddb_org::hostname']
-  config.vm.forward_port   22, 55022    # ssh
-  config.vm.forward_port   80, 55080    # apache
+  portBase ||= hieraCfg['::vagrant::portBase'] 
+  portBase ||= 44000 
+  config.vm.forward_port   22, portBase + 22  # ssh
+  config.vm.forward_port   80, portBase + 80  # apache
   
 end
