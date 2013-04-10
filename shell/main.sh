@@ -30,3 +30,6 @@ else
   cd $PUPPET_DIR && librarian-puppet update
 fi
 
+# Initialize /etc/puppet/hiera.yaml
+if [ ! -d /etc/puppet ]            ; then mkdir /etc/puppet; fi
+if [ ! -f /etc/puppet/hiera.yaml ] ; then cp $PUPPET_DIR/hiera.yaml /etc/puppet/hiera.yaml; fi
