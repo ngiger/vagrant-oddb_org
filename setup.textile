@@ -47,6 +47,7 @@ h2. installation into an already running funtoo server
 These steps have not yet been verified. Ask Niklaus if it does not work! They must be run as root
 
 bc. emerge puppet  # ensure that version 3.1 or higher is installed
+emerge ruby-augeas  # this must also be installed before running puppet to avoid errors
 mv /etc/puppet /etc/puppet.backup
 git clone git://github.com/ngiger/vagrant-oddb_org.git /etc/puppet
 gem install librarian-puppet

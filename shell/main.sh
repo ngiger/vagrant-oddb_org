@@ -33,3 +33,8 @@ fi
 # Initialize /etc/puppet/hiera.yaml
 if [ ! -d /etc/puppet ]            ; then mkdir /etc/puppet; fi
 if [ ! -f /etc/puppet/hiera.yaml ] ; then cp $PUPPET_DIR/hiera.yaml /etc/puppet/hiera.yaml; fi
+
+# ruby-augeas must also be installed before running puppet 
+eix ruby-augeas 
+if [ $? -ne 0 ] ; then emerge ruby-augeas ; fi
+
