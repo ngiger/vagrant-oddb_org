@@ -6,7 +6,7 @@ class oddb_org::mail(
   $email_password = hiera('::oddb_org::mail::password',  'put your password   into /tmp/hiera-data/private/config.yaml'),
   $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host  into /tmp/hiera-data/private/config.yaml'),
   
-) inherits oddb_org {
+) inherits oddb_org::oddb_git {
   $mail_package = 'ssmtp'
   file { '/etc/puppet/private':
     ensure => directory,
@@ -55,7 +55,7 @@ smtp_port: 587
     owner => 'root',
     group => 'root',
     mode => '0644',    
-    require => Package[$mail_package],
+    require => [ Vcsrepo["$ODDB_HOME"], Package[$mail_package], ]
 }
   
 
