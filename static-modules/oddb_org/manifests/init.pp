@@ -52,6 +52,7 @@ class oddb_org(
     if !defined(User['apache']) {
       user{'apache': require => Package['apache']}
     }
+    
     if !defined(Group['apache']) {
       group{'apache': require => Package['apache']}
     }
@@ -78,12 +79,14 @@ class oddb_org(
       system => true,
     }
     
-    user{"$oddb_user":
-      ensure => present,
-      system => false,
-      password => "1234",
-    }     
-  
+    if ("$oddb_user" != "apache") {
+      user{"$oddb_user":
+        ensure => present,
+        system => false,
+        password => "1234",
+      }     
+    }
+    
     group{"$oddb_group":
       ensure => present,
       system => false,
