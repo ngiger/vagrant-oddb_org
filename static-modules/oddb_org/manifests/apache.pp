@@ -100,11 +100,6 @@ class oddb_org::apache(
 # Debug: Augeas[/etc/conf.d/apache2](provider=augeas): sending command 'set' with params ["/files/etc/conf.d/apache2/APACHE2_OPTSxx", "=-D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE -D RUBY"]  
     Package["ruby-augeas"] -> Augeas <| |>
 
-   package{ "ruby-augeas":
-    provider => portage,
-    ensure => installed,
-    }
-    
     augeas { "$apache2_conf":
       context => "/files${apache2_conf}",
       lens    => "Puppet.lns",

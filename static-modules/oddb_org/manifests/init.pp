@@ -92,12 +92,15 @@ class oddb_org(
       system => false,
     }     
   
+    package{"ruby-augeas": }
+    
     host { "$server_name":
       ensure       => present,
       ip           => hiera('::oddb_org::ip', '198.168.0.1'),
       host_aliases => hiera('::oddb_org::aliases', 'oddb'),
       comment      => "Needed to run bin/oddb",
       provider     => augeas,
+      require      => Package["ruby-augeas"],
     }
 
    file{'/etc/localtime':
