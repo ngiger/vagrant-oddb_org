@@ -68,7 +68,7 @@ class oddb_org::apache(
       source => 'https://github.com/shugo/mod_ruby.git',
       # cloning via git did not work!
       # source => "git://scm.ywesee.com/oddb.org/.git ",
-#      require => [User['apache'],],
+      require => [User['apache'],],
   }  
   
   $install_mod_ruby_script = '/usr/local/bin/install_mod_ruby.sh'

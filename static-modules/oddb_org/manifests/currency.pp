@@ -42,7 +42,7 @@ class oddb_org::currency(
   service{"currency":
     ensure => running,
     hasrestart => true,
-    require    => File["$currency_service"],
+    require    => [User['apache'], File["$currency_service"]],
     subscribe  => File["$currency_service"],
   }
 }
