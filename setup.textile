@@ -41,6 +41,35 @@ h3. Start vagrant
 * @cd /path/to/clone/of/vagrant-oddb_org@
 ** @vagrant up@  # will take half an hour or so
 
+
+h2. installation into an already running funtoo server
+
+These steps have not yet been verified. Ask Niklaus if it does not work! They must be run as root
+
+bc. emerge puppet  # ensure that version 3.1 or higher is installed
+mv /etc/puppet /etc/puppet.backup
+git clone git://github.com/ngiger/vagrant-oddb_org.git /etc/puppet
+gem install librarian-puppet
+librarian-puppet install --clean
+mkdir /etc/puppet/private
+vim etc/puppet/private/config.yml # see section "Create and edit your configuration"
+cd /etc/puppet
+puppet apply
+
+h2. Testing changes
+
+If you want to test your configuration or your changes to manifests, the following might work for you
+
+bc. cd /etc/puppet
+librarian-puppet install
+rm -rf /etc/yus
+# shows the step needed to recreate the yus DB
+puppet apply modules/oddb_org/tests/yus.pp --noop  
+# verbose output
+puppet apply modules/oddb_org/tests/yus.pp --verbose 
+# debugging output
+puppet apply modules/oddb_org/tests/yus.pp --debug 
+
 h2. remarks
 
 If you want to change the servername you have to edit the following file
