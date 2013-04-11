@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+RSA_NAME="<%= scope.lookupvar('username') %>"
+YUS_ROOT="<%= scope.lookupvar('yus_root') %>"
+ROOT_USER="<%= scope.lookupvar('root_name') %>"
+ROOT_PW="<%= scope.lookupvar('root_pw') %>"
+
+SHA_CMD= 'ruby18 /usr/local/lib64/ruby/gems/1.8/gems/yus-1.0.0/sha256.rb'
+
+rsaFile = "#{YUS_ROOT}/data/#{RSA_NAME}_rsa"
+crtFile = "#{rsaFile}.crt"
+puts "RSA_NAME ist #{RSA_NAME} rsaFile is #{rsaFile} crt #{crtFile}"
+ENV['HOME'] ||= '/tmp' # or yus_add_user would fail
+
+def createRsaKeyAndCrt(rsaFile, crtFile)
+  cmd ="ssh-keygen -t rsa -f #{rsaFile}"
+  unless File.exists?(rsaFile)
+    puts cmd
+    exit 1 unless system(cmd) 
+  end
+
+  unless File.exists?(crtFile)
+    cmd ="openssl req -key #{rsaFile} -out #{crtFile}"
+    cmd += " -new -x509 -batch -passin pass:''"
+    puts cmd
+    exit 1 unless system(cmd) 
+  end
+end
+
+def createYusYaml(rsaFile, crtFile)
+  cmd ="#{SHA_CMD} #{ROOT_PW}"
+  puts cmd
+  ausgabe=`#{cmd}`.split("\n")
+  pwHash=nil
+  ausgabe.each{|line|
+    next if /ROOT_PW/.match(line)
+    pwHash=line.chomp.split(': ')[-1]
+              }
+  puts "ROOT_PW pwHash ist <#{pwHash}>"
+
+  yus_yaml_content=%(# Managed by puppet in module oddb_org/manifests/yus.pp
+root_name: #{RSA_NAME}@ywesee.com
+root_pass: #{pwHash}
+log_level: DEBUG
+ssl_key: #{rsaFile}
+ssl_cert: #{crtFile}
+  )
+
+  puts yus_yaml_content
+  yusYamlFile=File.open("#{YUS_ROOT}/yus.yml", 'w+')
+  yusYamlFile.puts yus_yaml_content
+end
+
+createRsaKeyAndCrt(rsaFile, crtFile)
+createYusYaml(rsaFile, crtFile)

@@ -5,6 +5,7 @@ class oddb_org::mail(
   $email_user     = hiera('::oddb_org::mail::user',      'put your username   into /tmp/hiera-data/private/config.yaml'),
   $email_password = hiera('::oddb_org::mail::password',  'put your password   into /tmp/hiera-data/private/config.yaml'),
   $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host  into /tmp/hiera-data/private/config.yaml'),
+  $oddb_yml = "$ODDB_HOME/etc/oddb.yml", # needed of oddb_org::all
   
 ) inherits oddb_org::oddb_git {
   $mail_package = 'ssmtp'
@@ -43,7 +44,6 @@ FromLineOverride=Yes
     mode => '0644',    
     require => Package[$mail_package],
 }
-  $oddb_yml = "$ODDB_HOME/etc/oddb.yml"
   file {"$oddb_yml" :
     content => "# Managed by puppet oddb_org/manifests/mail.pp
 smtp_server: ${mail_smtp_host}

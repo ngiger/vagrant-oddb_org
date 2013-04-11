@@ -6,7 +6,8 @@ class oddb_org::yus(
   $root_name  = hiera('::oddb_org::root_name', 'dummy_root'),
   $root_pw    = hiera('::oddb_org::root_pw', 'dummy_root_pw'),
   $yus_root   = "/etc/yus",
-  $yus_data   = "/etc/yus/data"
+  $yus_data   = "/etc/yus/data",
+  $yus_grant_user = "$inst_logs/yus_grant_user.okay" # needed for oddb_org::all
 ) inherits oddb_org::pg {
 
   package{'ruby-password':
@@ -138,6 +139,15 @@ exit",
     user => "$oddb_user",
   }
   
+  service{"yus":
+    ensure => running,
+    hasrestart => true,
+    require => [Exec["$yus_db_created", "$yus_create_yml"], ],
+    subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml" ], 
+      File["$yus_service"] 
+    ],
+  }
+  
   $yus_grant_user_script = '/usr/local/bin/yus_grant_user.rb'
   file {"$yus_grant_user_script":
       content => template('oddb_org/yus_grant_user.rb.erb'),
@@ -147,25 +157,15 @@ exit",
       mode => '0775',
   }
   
-  $yus_grant_user = "$inst_logs/yus_grant_user.okay"
   exec{ "$yus_grant_user":
     command => "$yus_grant_user_script && touch $yus_grant_user",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       Exec["$yus_create_yml"],
     ],
-    subscribe  =>  Exec["$yus_create_yml"], 
+    subscribe  =>  Service["yus"], 
     creates => "$yus_grant_user",
     user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"yus":
-    ensure => running,
-    hasrestart => true,
-    require => [Exec["$yus_db_created", "$yus_create_yml"], ],
-    subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml", $yus_grant_user ], 
-      File["$yus_service"] 
-    ],
   }
   
 }
