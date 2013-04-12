@@ -15,8 +15,10 @@ h3. Create a basebox using veewee
 
 * @git clone git://github.com/jedi4ever/veewee.git@
 * @cd veewee@
-* @bundle install@
-* @cp -rp ../vagrant-oddb_org/definitions .@
+* Assure that the reference for vagrant is active in the Gemfile (Somebody made it inactive as per 2013-04-03)
+* @bundle update@
+* @vagrant basebox define funtoo-oddb funtoo-latest-x86_64@
+* Edit definitions/funtoo-oddb/definition.rb to match the desired numbers of CPUs and memory
 * @vagrant basebox build  funtoo-oddb@ # may take an hour or more
 * @vagrant basebox export funtoo-oddb@
 * @vagrant box add funtoo-oddb funtoo-oddb.box@
