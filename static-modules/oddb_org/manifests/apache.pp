@@ -83,39 +83,22 @@ class oddb_org::apache(
   exec{"$install_mod_ruby":
     command => "sudo -i $install_mod_ruby_script && \
     touch $install_mod_ruby",
-#    creates => "$install_mod_ruby",
     path => "$path",
     require => File["$install_mod_ruby_script"],
-    onlyif  => "/usr/bin/diff $install_mod_ruby /usr/lib64/apache2/modules/mod_ruby.so; /usr/bin/test $? -ne 0",
+    onlyif  => "/usr/bin/diff /opt/src/mod_ruby/mod_ruby.so /usr/lib64/apache2/modules/mod_ruby.so; /usr/bin/test $? -ne 0",
    }
    
   $apache2_conf = '/etc/conf.d/apache2'
   $key          = 'APACHE2_OPTS'
   $value        = '-D RUBY -D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE'
   
-  if (0 == 1) { # TODO: make augeas work !
-# Debug: Augeas[/etc/conf.d/apache2](provider=augeas): /augeas/files/etc/conf.d/apache2/error/lens = /usr/share/augeas/lenses/dist/inifile.aug:311.25-.43:
-# Debug: Augeas[/etc/conf.d/apache2](provider=augeas): /augeas/files/etc/conf.d/apache2/error/message = Get did not match entire input
-# Debug: Augeas[/etc/conf.d/apache2](provider=augeas): Will attempt to save and only run if files changed
-# Debug: Augeas[/etc/conf.d/apache2](provider=augeas): sending command 'set' with params ["/files/etc/conf.d/apache2/APACHE2_OPTSxx", "=-D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE -D RUBY"]  
-    Package["ruby-augeas"] -> Augeas <| |>
-
-    augeas { "$apache2_conf":
-      context => "/files${apache2_conf}",
-      lens    => "Puppet.lns",
-      onlyif  => "get $key != '$value'",
-      changes =>  "set $key \"$value\"",
-      incl    => "$apache2_conf",
-    }
-  } else {
-    file {"$apache2_conf":
-      content => "#managed by puppet oddb_org/manifests/apache.pp
+  file {"$apache2_conf":
+    content => "#managed by puppet oddb_org/manifests/apache.pp
 $key=\"$value\"
 ",
-        owner => 'root',
-        group => 'root',
-        mode => 0644,
-    }
+      owner => 'root',
+      group => 'root',
+      mode => 0644,
   }
   
 }
