@@ -31,7 +31,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
   exec{ "$csv_patched":
     command => "$apply_ruby_patch 1.9 csv.rb $csv_rb_patch && touch $csv_patched",
     creates => "$csv_patched",
-    require => [ Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
+    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
@@ -46,7 +46,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
   exec{ "$columninfo_patched":
     command => "$apply_ruby_patch 1.9 lib/dbi/columninfo.rb $columninfo_rb_patch && touch $columninfo_patched",
     creates => "$columninfo_patched",
-    require => [ Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
+    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
@@ -61,7 +61,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
   exec{ "$statement_patched":
     command => "$apply_ruby_patch 1.9 lib/dbi/handles/statement.rb $statement_rb_patch && touch $statement_patched",
     creates => "$statement_patched",
-    require => [ Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
+    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
   
@@ -76,7 +76,7 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
   exec{ "$row_patched":
     command => "$apply_ruby_patch 1.9 lib/dbi/row.rb $row_rb_patch && touch $row_patched",
     creates => "$row_patched",
-    require => [ Exec [ 'bundle_oddb_org', "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
+    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
   

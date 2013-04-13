@@ -4,6 +4,7 @@ class { 'git': }
 
 class oddb_org::oddb_git(
   $SETUP_DIR = '/home/vagrant/oddb_setup',
+  $bundle_oddb_org =  "$inst_logs/oddb_bundle_install.okay"
 ) inherits oddb_org::pg {
   
   vcsrepo {  "$ODDB_HOME":
@@ -51,9 +52,9 @@ class oddb_org::oddb_git(
    
   package{'imagemagick':}  # needed for gem rmagick
   
-  exec { 'bundle_oddb_org':
-    command => "bundle install && touch install.okay",
-    creates => "$inst_logs/oddb_bundle_install.okay",
+  exec { "$bundle_oddb_org":
+    command => "bundle install && touch $bundle_oddb_org",
+    creates => "$bundle_oddb_org",
     cwd => "$ODDB_HOME",
     path => "$path",
     require => [  Package['bundler', 'imagemagick', 'tmail'],
