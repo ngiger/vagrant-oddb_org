@@ -21,18 +21,23 @@ if [ ! -x $GIT ]; then
     fi
 fi
 
-if [ ! -d /vagrant ] ; then cp /vagrant/Puppetfile $PUPPET_DIR ; fi
+# Initialize /etc/puppet/hiera.yaml
+df -h | grep hieradata 
+if [ $? -eq 0  ] ; then
+  export HIERA_DATA=/`df -h | grep hieradata | cut -d / -f 2-`
+  echo HIERA_DATA ist $HIERA_DATA
+  if [ ! -L /etc/puppet/hiera.yaml ] ; then ln -s $HIERA_DATA/hiera.yaml /etc/puppet/hiera.yaml; fi
+  if [ ! -L /etc/hiera.yaml ]        ; then ln -s $HIERA_DATA/hiera.yaml /etc/hiera.yaml; fi
+fi
 
+# prepare environment for librarian-puppet
+if [ ! -d /vagrant ] ; then cp /vagrant/Puppetfile $PUPPET_DIR ; fi
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   gem install --no-ri --no-rdoc librarian-puppet
   cd $PUPPET_DIR && librarian-puppet install --clean
 else
   cd $PUPPET_DIR && librarian-puppet update
 fi
-
-# Initialize /etc/puppet/hiera.yaml
-if [ ! -d /etc/puppet ]            ; then mkdir /etc/puppet; fi
-if [ ! -f /etc/puppet/hiera.yaml ] ; then cp $PUPPET_DIR/hiera.yaml /etc/puppet/hiera.yaml; fi
 
 # ruby-augeas must also be installed before running puppet 
 eix ruby-augeas 

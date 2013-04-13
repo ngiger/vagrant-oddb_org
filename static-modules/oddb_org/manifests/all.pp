@@ -26,9 +26,9 @@ class oddb_org::all (
     include oddb_org::ruby_patches
     include oddb_org::yus
     
+    File["$oddb_org::mail::oddb_yml"] -> Exec["$oddb_org::yus::yus_grant_user"] # I just want to see this error soon
     Exec["$oddb_org::yus::yus_grant_user"] -> Service['apache2']
     Service['currency'] -> Service['yus']
     Service['yus'] -> Service['apache2']
     Service['apache2'] -> Service['oddb']
-    File["$oddb_org::mail::oddb_yml"] -> Service['oddb']
 }
