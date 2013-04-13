@@ -127,7 +127,7 @@ exit",
       mode => '0775',
   }
   
-  $yus_create_yml = "$yus_data/yus.yml"
+  $yus_create_yml = "$yus_root/yus.yml"
   exec{ "$yus_create_yml":
     command => "$yus_create_yml_script",
     path => '/usr/local/bin:/usr/bin:/bin',
