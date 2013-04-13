@@ -162,7 +162,10 @@ exit",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       Exec["$yus_create_yml"],
+      Service['yus'],
     ],
+    tries => 3,     # the yus service is not always ready the first time. Therefore we try it 3 times
+    try_sleep => 5, # and wait 5 seconds in between
     subscribe  =>  Service["yus"], 
     creates => "$yus_grant_user",
     user => 'root', # need to be root to (re-)start yus
