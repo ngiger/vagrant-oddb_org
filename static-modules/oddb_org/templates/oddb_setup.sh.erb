@@ -15,6 +15,7 @@ ruby19 bin/update_css
 # Here we compile some helper methods using ruby18, even when we
 # will use them afterwards with ruby19
 # Niklaus just does not want to patch too much!
+export RUBYOPT="-rauto_gem"
 eselect ruby set ruby18
 ruby18 -v
 gem18 list -i racc;  if [ $? -ne 0 ] ; then gem18 install racc; fi
@@ -41,4 +42,5 @@ if [ $? -ne 0 ] ; then exit 1; fi
 make install
 if [ $? -ne 0 ] ; then exit 1; fi
 eselect ruby set ruby19
+unset RUBYOPT
 

@@ -59,6 +59,7 @@ class oddb_org(
     package{['apache', 
       'etckeeper',  # nice to have a git based history of the /etc 
       'htop',       # Niklaus likes it better than top
+      'vim',        # We want full vi support
       ]: 
       require => Host["$server_name"],
     }
@@ -95,6 +96,24 @@ class oddb_org(
       require      => Package["ruby-augeas"],
     }
 
+    file{'/etc/conf.d/keymaps':
+      ensure => present,
+      content => '# Managed by puppet
+keymap="us"
+windowkeys="YES"
+extended_keymaps=""
+dumpkeys_charset=""
+fix_euro="yes"
+',
+      owner => 'root',
+      group => 'root',
+      mode  => 0555,
+    }
+    
+   file{'/etc/env.d/10rubygems:'
+      ensure => absent,
+    }
+    
    file{'/etc/localtime':
       ensure => link,
       target => '/usr/share/zoneinfo/Europe/Zurich',
