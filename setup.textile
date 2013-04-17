@@ -41,6 +41,8 @@ bc. "::oddb_org::mail::smtp_host":  smtp.provider.net:port
 h3. Start vagrant
 
 * @cd /path/to/clone/of/vagrant-oddb_org@
+* @bundle install@
+* @librarian-puppet install --clean@
 ** @vagrant up@  # will take half an hour or so
 
 
@@ -52,11 +54,11 @@ bc. emerge puppet  # ensure that version 3.1 or higher is installed
 emerge ruby-augeas  # this must also be installed before running puppet to avoid errors
 mv /etc/puppet /etc/puppet.backup
 git clone git://github.com/ngiger/vagrant-oddb_org.git /etc/puppet
-gem install librarian-puppet
-librarian-puppet install --clean
 mkdir /etc/puppet/private
 vim etc/puppet/private/config.yml # see section "Create and edit your configuration"
 cd /etc/puppet
+bundle install
+librarian-puppet install --clean
 puppet apply
 
 h2. Testing changes
