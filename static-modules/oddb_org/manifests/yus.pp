@@ -60,7 +60,7 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
   }
 
   $service_location = "/usr/local/bin/yusd"
-  $service_user     = "$oddb_user"
+  $service_user     = "root"
   $yus_installed_okay = "$inst_logs/yus_installed.okay"
   exec{ "$yus_install_script":
     command => "$yus_install_script && touch $yus_installed_okay",
