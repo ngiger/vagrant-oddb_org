@@ -9,6 +9,27 @@ class oddb_org::services(
   # * readonly
   # * fipdf
   
+  package{['rwv2', 'ydocx', 'rpdf2txt']:
+    provider => gem,
+  }
+    
+  # we need to compile and install rwv2
+  $rwv2_git = '/opt/src/rwv2'
+  vcsrepo {"$rwv2_git":
+      ensure => present,
+      provider => git,
+      source => 'git://scm.ywesee.com/rwv2',
+      require => [User['apache'],],
+  }  
+  
+  exec{ "install_rwv2":
+    command => "ruby19 install.rb config && ruby19 install.rb setup && ruby19 install.rb install",
+    cwd => "$rwv2_git",
+    path => '/usr/local/bin:/usr/bin:/bin',
+    require => Vcsrepo["$rwv2_git"],
+    creates => "/usr/lib64/ruby/site_ruby/1.9.1/x86_64-linux/rwv2.so",
+  }
+
   $crawler_name     = "oddb_crawler"
   $crawler_run      = "/var/lib/service/$crawler_name/run"
   exec{ "$crawler_run":
@@ -62,8 +83,9 @@ class oddb_org::services(
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       File["$create_service_script"],
+      Exec["install_rwv2"],
       User["$oddb_user"],
-      Package['daemontools', 'app-text/wv2'],
+      Package['daemontools', 'app-text/wv2', 'rwv2', 'ydocx', 'rpdf2txt'],
     ],
     creates => "$fiparse_run",
     user => 'root', # need to be root to (re-)start yus
@@ -80,7 +102,7 @@ class oddb_org::services(
     ensure => running,
     provider => "daemontools",
     hasrestart => true,
-    subscribe  => Exec["$fiparse_run"],
+    subscribe  => Exec["$fiparse_run", "install_rwv2"],
     require    => [User['apache'], Exec["$fiparse_run"], ],
   }
 
