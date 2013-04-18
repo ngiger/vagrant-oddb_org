@@ -21,7 +21,6 @@ class oddb_org::oddb_git(
   
   file {"$ODDB_HOME/doc":
     ensure  => directory,
-#    recurse => true,
     owner => "$oddb_user",
     group => "apache",
     mode    => 0664, # must bewritable for oddb services and apache
@@ -30,7 +29,6 @@ class oddb_org::oddb_git(
   
   file {"$ODDB_HOME/data":
     ensure  => directory,
-#    recurse => true,
     owner => "$oddb_user",
     group => "apache",
     mode    => 0664, # must bewritable for oddb services and apache
@@ -85,29 +83,6 @@ class oddb_org::oddb_git(
     ],
   }
   
-  if (0 == 1) { # install using a git checkout of dbi
-
-  package{ 'zip': } # needed to rake dbi!
-  
-  $dbi_root =  "/opt/dbi"
-  $install_dbi_cmd = "/usr/local/bin/install_dbi.sh"
-  
-  file { "$install_dbi_cmd":
-    content => template('oddb_org/install_dbi.sh.erb'),
-    owner => 'root',
-    group => 'root',
-    mode  => 0754,
-  }
-  
-  exec  { 'install_dbi':
-  command => "$install_dbi_cmd",
-    path => "$path",
-    require => [ File["$install_dbi_cmd"], ],
-    creates => '/opt/dbi/gen_gem.okay',
-  }
-  } else {
-  }
-
   file { "$ODDB_HOME/src/testenvironment.rb":
     source => "puppet:///modules/oddb_org/testenvironment_rb.txt",
     owner => 'apache',
@@ -125,20 +100,23 @@ class oddb_org::oddb_git(
   }
   
   $service_location = "$ODDB_HOME/bin/oddbd"
-  $oddb_service     = '/etc/init.d/oddb'
-  $service_user     = "$oddb_user"
-
-  file{ "$oddb_service":
-    content => template("oddb_org/service.erb"),
-    owner => 'root',
-    group => 'root',
-    mode  => 0755,
+  $oddb_run     = "/var/lib/service/oddb/run"
+  exec{ "$oddb_run":
+    command => "$create_service_script $oddb_user oddb $ODDB_HOME/bin/oddbd",
+    path => '/usr/local/bin:/usr/bin:/bin',
+    require => [
+      File["$create_service_script"],
+      User["$oddb_user"],
+      Package['daemontools'],
+    ],
+    creates => "$oddb_run",
+    user => 'root', # need to be root to (re-)start yus
   }
   
   service{"oddb":
     ensure => running,
+    provider => "daemontools",
     hasrestart => true,
-    require => [Exec["$oddb_setup_run"], File["$oddb_service"], ],
+    require    => [User['apache'], Exec["$oddb_setup_run", "$oddb_run"], ],
   }
-   
 }

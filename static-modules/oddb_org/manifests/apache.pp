@@ -16,7 +16,7 @@ class oddb_org::apache(
     source => "puppet:///modules/oddb_org/httpd.conf.txt",
     owner => 'apache',
     group => 'apache',
-    mode  => 0554,
+    mode  => 0644,
       require => [ Package['apache'], ],
   }
   

@@ -6,7 +6,19 @@ class oddb_org::currency(
   $root_name    = hiera('::oddb_org::root_name', 'dummy_root'),
   $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash'),
 ) inherits oddb_org {
-  # at the moment we assume it as installed!
+
+  $currency_run     = "/var/lib/service/currency/run"
+  exec{ "$currency_run":
+    command => "$create_service_script $oddb_user currency /usr/local/bin/currencyd",
+    path => '/usr/local/bin:/usr/bin:/bin',
+    require => [
+      File["$create_service_script"],
+      User["$oddb_user"],
+      Package['daemontools'],
+    ],
+    creates => "$currency_run",
+    user => 'root', # need to be root to (re-)start yus
+  }
 
   $currency_repo = '/opt/src/ycurrency'
   vcsrepo {  "$currency_repo":
@@ -25,24 +37,17 @@ class oddb_org::currency(
   $service_user     = "$oddb_user"
   
   exec{ "$service_location":
-    command => "gem install ycurrency",
+    command => "gem install currency",
     path => '/usr/local/bin:/usr/bin:/bin',
     creates => $service_location,
   }
   
-  $currency_service = '/etc/init.d/currency'
-  file{ "$currency_service":
-    content => template("oddb_org/service.erb"),
-    owner => 'root',
-    group => 'root',
-    mode  => 0755,
-    require => Exec["$service_location"],
-  }
-  
   service{"currency":
     ensure => running,
+    provider => "daemontools",
+#    path     => "/
     hasrestart => true,
-    require    => [User['apache'], File["$currency_service"]],
-    subscribe  => File["$currency_service"],
+    require    => [User['apache'], Exec["$service_location", "$currency_run"], ],
   }
+
 }

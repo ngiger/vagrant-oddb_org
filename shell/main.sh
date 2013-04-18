@@ -31,6 +31,6 @@ if [ $? -eq 0  ] ; then
 fi
 
 # ruby-augeas must also be installed before running puppet 
-eix ruby-augeas 
+which eix && eix ruby-augeas 
 if [ $? -ne 0 ] ; then emerge ruby-augeas ; fi
 

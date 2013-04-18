@@ -47,8 +47,27 @@ class oddb_org(
   $path               = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin:/usr/x86_64-pc-linux-gnu/gcc-bin/4.6.3',
   $oddb_user          = 'apache',
   $oddb_group         = 'oddb',
-  $inst_logs          = '/opt/logs'
+  $inst_logs          = '/opt/logs',
+  $create_service_script = '/usr/local/bin/create_service.rb'
 ) {
+
+    package{'daemontools': }
+
+    $rc_svscan     = "/etc/init.d/svscan"
+    exec{ "$rc_svscan":
+      command => "/sbin/rc-update add svscan",
+      require => [
+        Package['daemontools'],
+      ],
+      creates => "$rc_svscan",
+      user => 'root', # need to be root to (re-)start yus
+    }
+
+    file { "$create_service_script":
+      source => "puppet:///modules/oddb_org/create_service.rb",
+      mode  => 0774,
+      require => [Package['apache'],],
+    }
 
     if !defined(User['apache']) {
       user{'apache': require => Package['apache']}
@@ -113,7 +132,7 @@ fix_euro="yes"
 ',
       owner => 'root',
       group => 'root',
-      mode  => 0555,
+      mode  => 0644,
     }
     
    file{'/etc/localtime':
@@ -121,7 +140,7 @@ fix_euro="yes"
       target => '/usr/share/zoneinfo/Europe/Zurich',
       owner => 'root',
       group => 'root',
-      mode  => 0555,
+      mode  => 0644,
     }
     
   file { "$inst_logs":

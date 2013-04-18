@@ -102,15 +102,18 @@ exit",
     user => 'postgres',
   }
   
-  $yus_service = '/etc/init.d/yus'
-  file{ "$yus_service":
-    content => template("oddb_org/service.erb"),
-    owner => "$oddb_user",
-    group => "$oddb_user",
-    mode  => 0775,
-#    require => File["$service_location"],
+  $yus_run     = "/var/lib/service/yus/run"
+  exec{ "$yus_run":
+    command => "$create_service_script root yus /usr/local/bin/yusd",
+    path => '/usr/local/bin:/usr/bin:/bin',
+    require => [
+      File["$create_service_script"],
+      User["$oddb_user"],
+      Package['daemontools'],
+    ],
+    creates => "$yus_run",
   }
-  
+    
   $yus_create_yml_script = '/usr/local/bin/yus_create_yml.rb'
   file {"$yus_create_yml_script":
       content => template('oddb_org/yus_create_yml.rb.erb'),
@@ -125,19 +128,18 @@ exit",
     command => "$yus_create_yml_script",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
-      Exec["$yus_db_created"],
-      File["$yus_service"],
+      Exec["$yus_db_created", "$yus_run"],
     ],
     creates => "$yus_create_yml",
     user => "$oddb_user",
   }
   
   service{"yus":
+    provider => "daemontools",
     ensure => running,
     hasrestart => true,
     require => [Exec["$yus_db_created", "$yus_create_yml"], ],
-    subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml" ], 
-      File["$yus_service"] 
+    subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml", "$yus_run"] 
     ],
   }
   

@@ -23,6 +23,8 @@ then
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
+sudo -u postgres psql -c 'create role apache with LOGIN;'
+
 # scp ywesee@thinpower.ywesee.com:/var/backup/thinpower/db/postgresql/${m[nm]}-$yyyy/$yyyy-$mm-$dd/22\:00-postgresql_database-$DB_NAME-backup.gz data/sql/$DB_NAME.$yyyy$mm$dd.sql.gz
 cd data/sql
 zcat $DB_DUMP | psql -U postgres $DB_NAME
