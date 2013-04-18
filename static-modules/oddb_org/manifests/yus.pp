@@ -29,7 +29,6 @@ class oddb_org::yus(
       owner => "$oddb_user",
       group => "$oddb_group",
       require => [ User["$oddb_user"], Group["$oddb_group"], ],
-      mode => '0664',
   }
     
   file {"$yus_data":
@@ -37,7 +36,6 @@ class oddb_org::yus(
       owner => "$oddb_user",
       group => "$oddb_group",
       require => [ User["$oddb_user"], Group["$oddb_group"],File["$yus_root"] ],
-      mode => '0664',
   }
     
   file {'/usr/local/bin/sha256.rb':
@@ -61,14 +59,14 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
 
   $service_location = "/usr/local/bin/yusd"
   $service_user     = "root"
-  $yus_installed_okay = "$inst_logs/yus_installed.okay"
+  $install_yus_okay = "$inst_logs/install_yus.okay"
   exec{ "$yus_install_script":
-    command => "$yus_install_script && touch $yus_installed_okay",
+    command => "$yus_install_script && touch $install_yus_okay",
     path => '/usr/local/bin:/usr/bin:/bin',
     require   => [File["$yus_root", "$yus_data", $yus_install_script], # "$service_location"],
     ],
     subscribe => File["$yus_install_script" ],
-    # creates => "$yus_installed_okay",
+    # creates => "$install_yus_okay",
     onlyif => [
       # run command if ruby19 specified or $service_location is not yet present
       "/bin/grep ruby19 $service_location; /usr/bin/test $? -eq 0 -o ! -f $service_location",
@@ -84,7 +82,7 @@ dropdb yus
 dropuser yus
 createuser yus --superuser
 createdb yus
-exit",
+exit 0",
       owner => "$oddb_user",
       group => "$oddb_group",
       require => User["$oddb_user"],
@@ -104,7 +102,7 @@ exit",
   
   $yus_run     = "/var/lib/service/yus/run"
   exec{ "$yus_run":
-    command => "$create_service_script root yus /usr/local/bin/yusd",
+    command => "$create_service_script root yus 'ruby18 /usr/local/bin/yusd'",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       File["$create_service_script"],
@@ -138,7 +136,8 @@ exit",
     provider => "daemontools",
     ensure => running,
     hasrestart => true,
-    require => [Exec["$yus_db_created", "$yus_create_yml"], ],
+    path    => "$service_path",
+    require => [Exec["$yus_db_created", "$yus_create_yml", "$yus_run"], Service['svscan'], ],
     subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml", "$yus_run"] 
     ],
   }
@@ -148,7 +147,7 @@ exit",
       content => template('oddb_org/yus_grant_user.rb.erb'),
       owner => "$oddb_user",
       group => "$oddb_group",
-      require => [ User["$oddb_user"],],
+      require => [ User["$oddb_user"], Exec["$yus_create_yml"], ],
       mode => '0775',
   }
   

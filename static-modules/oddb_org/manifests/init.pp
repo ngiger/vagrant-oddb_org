@@ -48,28 +48,44 @@ class oddb_org(
   $oddb_user          = 'apache',
   $oddb_group         = 'oddb',
   $inst_logs          = '/opt/logs',
-  $create_service_script = '/usr/local/bin/create_service.rb'
+  $create_service_script = '/usr/local/bin/create_service.rb',
+  $service_path          = '/var/lib/service'
 ) {
 
     package{'daemontools': }
-
-    $rc_svscan     = "/etc/init.d/svscan"
+    package{'librarian-puppet':
+      provider => gem,
+    }
+    
+    $rc_svscan          = '/etc/init.d/svscan'
     exec{ "$rc_svscan":
-      command => "/sbin/rc-update add svscan",
+      command => "/sbin/rc-update add svscan && $rc_svscan restart",
       require => [
         Package['daemontools'],
       ],
-      creates => "$rc_svscan",
+      onlyif => "/bin/ps -ef | /bin/grep svscan | grep -v grep; /usr/bin/test $? -ne 0",
       user => 'root', # need to be root to (re-)start yus
+    }
+    
+    service{"svscan":
+      provider => gentoo,
+      require => Exec["$rc_svscan"],
+      status => running,
+    }
+
+    file {'/var/lib/service':
+      ensure => directory,
+      mode  => 0644,
     }
 
     file { "$create_service_script":
       source => "puppet:///modules/oddb_org/create_service.rb",
       mode  => 0774,
-      require => [Package['apache'],],
+      require => [Package['apache'], File['/var/lib/service'],
+      ],
     }
 
-    if !defined(User['apache']) {
+   if !defined(User['apache']) {
       user{'apache': require => Package['apache']}
     }
     
@@ -84,10 +100,9 @@ class oddb_org(
     package{[
       'etckeeper',  # nice to have a git based history of the /etc 
       'htop',       # Niklaus likes it better than top
-      'vim',        # We want full vi support
       ]: 
-      require => Host["$server_name"],
     }
+    
     package {'postgresql-base':
       ensure => $pg_version,
     }  
@@ -109,9 +124,9 @@ class oddb_org(
       ensure => present,
       system => false,
     }     
-  
+      
     package{"ruby-augeas": }
-    
+
     host { "$server_name":
       ensure       => present,
       ip           => hiera('::oddb_org::ip', '198.168.0.1'),
@@ -165,4 +180,6 @@ fix_euro="yes"
     path => "$path",
     require => Package["etckeeper"],
   }
+
 }
+

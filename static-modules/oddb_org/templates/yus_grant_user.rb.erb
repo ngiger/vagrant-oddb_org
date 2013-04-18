@@ -83,8 +83,10 @@ cmd = "chown -R <%= scope.lookupvar('oddb_user') %>:<%= scope.lookupvar('oddb_gr
 puts cmd
 exit 1 unless system(cmd)
 
-system('/etc/init.d/yus restart')
-sleep(5)  # give yis some time to start up
+# Don't know why I have to reinstall yus (wiht gem18) here againg. But it works
+system('gem18 install yus --no-ri --no-rdoc')
+system('svc -u /service/yus')
+sleep(2)  # give yis some time to start up
 system('eselect ruby set ruby18')
 grantAllToRootUser
 system('eselect ruby set ruby19')

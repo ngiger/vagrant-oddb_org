@@ -37,7 +37,7 @@ class oddb_org::currency(
   $service_user     = "$oddb_user"
   
   exec{ "$service_location":
-    command => "gem install currency",
+    command => "gem install ycurrency",
     path => '/usr/local/bin:/usr/bin:/bin',
     creates => $service_location,
   }
@@ -45,7 +45,7 @@ class oddb_org::currency(
   service{"currency":
     ensure => running,
     provider => "daemontools",
-#    path     => "/
+    path    => "$service_path",
     hasrestart => true,
     require    => [User['apache'], Exec["$service_location", "$currency_run"], ],
   }

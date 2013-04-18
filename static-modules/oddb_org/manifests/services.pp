@@ -47,9 +47,10 @@ class oddb_org::services(
   service{"$crawler_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$crawler_run"],
-    require    => [User['apache'], Exec["$crawler_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$crawler_run"], ],
   }
 
   $export_name     = "ch.oddb-export"
@@ -69,9 +70,10 @@ class oddb_org::services(
   service{"$export_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$export_run"],
-    require    => [User['apache'], Exec["$export_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$export_run"], ],
   }
 
   $fiparse_name     = "ch.oddb-fiparse"
@@ -101,9 +103,10 @@ class oddb_org::services(
   service{"$fiparse_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$fiparse_run", "install_rwv2"],
-    require    => [User['apache'], Exec["$fiparse_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$fiparse_run"], ],
   }
 
   $google_crawler_name     = "oddb_google_crawler"
@@ -123,9 +126,10 @@ class oddb_org::services(
   service{"$google_crawler_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$google_crawler_run"],
-    require    => [User['apache'], Exec["$google_crawler_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$google_crawler_run"], ],
   }
   
   $meddata_name     = "ch.oddb-meddata"
@@ -145,9 +149,10 @@ class oddb_org::services(
   service{"$meddata_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$meddata_run"],
-    require    => [User['apache'], Exec["$meddata_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$meddata_run"], ],
   }
 
   $swissindex_nonpharma_name     = "ch.oddb-swissindex_nonpharma"
@@ -167,9 +172,10 @@ class oddb_org::services(
   service{"$swissindex_nonpharma_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$swissindex_nonpharma_run"],
-    require    => [User['apache'], Exec["$swissindex_nonpharma_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$swissindex_nonpharma_run"], ],
   }
 
   $swissindex_pharma_name     = "ch.oddb-swissindex_pharma"
@@ -189,9 +195,10 @@ class oddb_org::services(
   service{"$swissindex_pharma_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$swissindex_pharma_run"],
-    require    => [User['apache'], Exec["$swissindex_pharma_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$swissindex_pharma_run"], ],
   }
   
   $swissreg_name     = "ch.oddb-swissreg"
@@ -211,9 +218,10 @@ class oddb_org::services(
   service{"$swissreg_name":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     subscribe  => Exec["$swissreg_run"],
-    require    => [User['apache'], Exec["$swissreg_run"], ],
+    require    => [Service['yus'], User['apache'], Exec["$swissreg_run"], ],
   }
 
 }
