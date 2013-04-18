@@ -3,7 +3,7 @@
 # License: GPLv2
 # Boxes are stored under ~/.vagrant.d/boxes/
 
-#boxUrl = 'http://ftp.heanet.ie/mirrors/funtoo/funtoo-current/vagrant/x86-64bit/vagrant-generic_64-funtoo-current-2012-01-26.box'
+boxUrl = 'http://ngiger.dyndns.org/downloads/funtoo-oddb.box'
 boxName     = 'funtoo-oddb'
 require 'yaml'
 hieraCfg = YAML.load(File.open( 'hieradata/private/config.yaml' ) )
@@ -48,5 +48,6 @@ Vagrant::Config.run do |config|
   portBase ||= 44000 
   config.vm.forward_port   22, portBase + 22  # ssh
   config.vm.forward_port   80, portBase + 80  # apache
+  config.vm.forward_port   81, portBase + 81  # shoe project
   
 end

@@ -9,19 +9,6 @@ h3. Clone the vagrant-oddb git and install the needed gems
 
 * @git clone git://github.com/ngiger/vagrant-oddb_org.git@
 * @cd vagrant-oddb@
-* @bundle install@
-
-h3. Create a basebox using veewee
-
-* @git clone git://github.com/jedi4ever/veewee.git@
-* @cd veewee@
-* Assure that the reference for vagrant is active in the Gemfile (Somebody made it inactive as per 2013-04-03)
-* @bundle update@
-* @vagrant basebox define funtoo-oddb funtoo-latest-x86_64@
-* Edit definitions/funtoo-oddb/definition.rb to match the desired numbers of CPUs and memory
-* @vagrant basebox build  funtoo-oddb@ # may take an hour or more
-* @vagrant basebox export funtoo-oddb@
-* @vagrant box add funtoo-oddb funtoo-oddb.box@
 
 h3. Create and edit your configuration
 
@@ -43,7 +30,7 @@ h3. Start vagrant
 * @cd /path/to/clone/of/vagrant-oddb_org@
 * @bundle install@
 * @librarian-puppet install --clean@
-** @vagrant up@  # will take half an hour or so
+* @vagrant up@  # will take half an hour or so
 
 
 h2. installation into an already running funtoo server
@@ -81,3 +68,15 @@ If you want to change the servername you have to edit the following file
 * hieradata/private/config.yml 
 and create a definition for your host, e.g. using a logical link
 * @ln -s oddb.pp manifests/nodes/your_hostname.pp@
+
+h3. How the funtoo-oddb basebox was created using veewee
+
+* @git clone git://github.com/jedi4ever/veewee.git@
+* @cd veewee@
+* Assure that the reference for vagrant is active in the Gemfile (Somebody made it inactive as per 2013-04-03)
+* @bundle update@
+* @mkdir -p definitions && cp -rp /path/to/vagrant-odd/definitions/funtoo-oddb definitions@
+* Edit definitions/funtoo-oddb/definition.rb to match the desired numbers of CPUs and memory
+* @vagrant basebox build  funtoo-oddb@ # may take an hour or more
+* @vagrant basebox export funtoo-oddb@
+
