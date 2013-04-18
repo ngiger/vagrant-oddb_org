@@ -20,7 +20,7 @@ if [ ! -x $GIT ]; then
         echo "No package installer available. You may need to install git manually."
     fi
 fi
-emerge --sync
+emerge --sync && etc-update --automode -5
 
 # Initialize /etc/puppet/hiera.yaml
 df -h | grep hieradata
