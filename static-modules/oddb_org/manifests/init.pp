@@ -38,8 +38,9 @@
 class oddb_org(
   $destination        = "/var/www",
   $ODDB_HOME          = '/var/www/oddb.org',
-  $pg_base_version    = '8.4.16',
-  $pg_server_version  = '8.4.16-r1',
+  $pg_base_version    = '8.4.17',
+  $pg_server_version  = '8.4.17',
+  $apache_version     = '2.2.24',
   $ruby_version       = '1.9.3',
   $select_ruby_1_9    = 'eselect_ruby_1_9',
   $server_name        = hiera('::oddb_org::hostname', '198.168.0.1'),
@@ -56,7 +57,12 @@ class oddb_org(
     if !defined(Group['apache']) {
       group{'apache': require => Package['apache']}
     }
-    package{['apache', 
+    
+    package{'apache':
+      ensure => "$apache_version",
+    }
+    
+    package{[
       'etckeeper',  # nice to have a git based history of the /etc 
       'htop',       # Niklaus likes it better than top
       'vim',        # We want full vi support
@@ -108,10 +114,6 @@ fix_euro="yes"
       owner => 'root',
       group => 'root',
       mode  => 0555,
-    }
-    
-   file{'/etc/env.d/10rubygems:'
-      ensure => absent,
     }
     
    file{'/etc/localtime':

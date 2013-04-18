@@ -71,20 +71,24 @@ class oddb_org::apache(
       require => [User['apache'],],
   }  
   
+  package{'apache-tools': 
+    ensure => "$apache_version",
+  }
   $install_mod_ruby_script = '/usr/local/bin/install_mod_ruby.sh'
   file { "$install_mod_ruby_script":
     source => "puppet:///modules/oddb_org/install_mod_ruby.sh",
     owner => 'apache',
     group => 'apache',
-    mode  => 0554,
-    require => [Package['apache'], ],
+    mode  => 0774,
   }
   $install_mod_ruby = "$inst_logs/mod_ruby.okay"
   exec{"$install_mod_ruby":
     command => "sudo -i $install_mod_ruby_script && \
     touch $install_mod_ruby",
     path => "$path",
-    require => File["$install_mod_ruby_script"],
+    require =>  [ Package['apache', 'apache-tools'],
+                  File["$install_mod_ruby_script"],
+                ],
     onlyif  => "/usr/bin/diff /opt/src/mod_ruby/mod_ruby.so /usr/lib64/apache2/modules/mod_ruby.so; /usr/bin/test $? -ne 0",
    }
    

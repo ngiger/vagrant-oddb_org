@@ -20,6 +20,7 @@ if [ ! -x $GIT ]; then
         echo "No package installer available. You may need to install git manually."
     fi
 fi
+emerge --sync
 
 # Initialize /etc/puppet/hiera.yaml
 df -h | grep hieradata
@@ -33,8 +34,3 @@ fi
 eix ruby-augeas 
 if [ $? -ne 0 ] ; then emerge ruby-augeas ; fi
 
-# the environment variable RUBYOPT is only used with gem18 and gives us problem
-# with ruby 19. Therefore we remove it here and in oddb_org/init.pp
-ls -l /etc/env.d/10rubygems
-if [ -f /etc/env.d/10rubygems ] ; then rm -f /etc/env.d/10rubygems ; fi
-unset RUBYOPT

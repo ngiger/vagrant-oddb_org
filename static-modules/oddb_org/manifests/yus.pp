@@ -61,14 +61,7 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
 
   $service_location = "/usr/local/bin/yusd"
   $service_user     = "$oddb_user"
-  file {"${service_location}.not_needed":
-    source => "puppet:///modules/oddb_org/yusd18",
-      owner => "$oddb_user",
-      group => "$oddb_group",
-      mode => 0755,
-  }
-
-  $yus_installed_okay = "$inst_logs/yus_installed.okay2"
+  $yus_installed_okay = "$inst_logs/yus_installed.okay"
   exec{ "$yus_install_script":
     command => "$yus_install_script && touch $yus_installed_okay",
     path => '/usr/local/bin:/usr/bin:/bin',

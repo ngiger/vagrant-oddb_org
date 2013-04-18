@@ -79,11 +79,12 @@ echo #{ROOT_PW} | yus_add_user  DownloadUser
       end
   }
 end
-
 cmd = "chown -R <%= scope.lookupvar('oddb_user') %>:<%= scope.lookupvar('oddb_group') %> #{YUS_ROOT}"
 puts cmd
 exit 1 unless system(cmd)
 
 system('/etc/init.d/yus restart')
 sleep(5)  # give yis some time to start up
+system('eselect ruby set ruby18')
 grantAllToRootUser
+system('eselect ruby set ruby19')
