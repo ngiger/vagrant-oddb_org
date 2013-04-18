@@ -2,7 +2,11 @@
 
 class { 'git': }
 
-class oddb_org::pg inherits oddb_org {
+class oddb_org::pg(
+  $DB_NAME = hiera('::oddb_org::pg::name',                                            'oddb.org.ruby193'),
+  $DB_FILE = hiera('::oddb_org::pg::dump','http://pillbox.oddb.org/postgresql_database-oddb.org.ruby193-backup.gz')
+)
+inherits oddb_org {
 # puppetlabs-postgresql fails on funtoo
 #  class { 'postgresql':
 #    version => '8.4', # could not install 8.4.2, neither 8.4.9
@@ -48,7 +52,10 @@ class oddb_org::pg inherits oddb_org {
   exec{ "run_pg_oddb_loaded":
     command => "$pg_oddb_db_load_script && touch $pg_oddb_loaded",
     creates => "$pg_oddb_loaded",
-    require => Service['postgresql-8.4'],
+    require => [ 
+      Service['postgresql-8.4'],
+      File["$pg_oddb_db_load_script"] 
+    ],
     path => "$path",
     timeout => 15*160, # max wait time in seconds, took just above default 5 minutes on my machine
   }
