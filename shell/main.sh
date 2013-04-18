@@ -30,7 +30,9 @@ if [ $? -eq 0  ] ; then
   if [ ! -L /etc/hiera.yaml ]        ; then ln -s $HIERA_DATA/hiera.yaml /etc/hiera.yaml; fi
 fi
 
-# ruby-augeas must also be installed before running puppet 
-which eix && eix ruby-augeas 
+# eix and ruby-augeas must also be installed before running puppet 
+which eix 
+if [ $? -ne 0 ] ; then emerge eix ; fi
+eix ruby-augeas | grep Installed
 if [ $? -ne 0 ] ; then emerge ruby-augeas ; fi
 
