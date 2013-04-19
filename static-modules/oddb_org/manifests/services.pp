@@ -11,6 +11,7 @@ class oddb_org::services(
   
   package{['rwv2', 'ydocx', 'rpdf2txt']:
     provider => gem,
+    require => Exec["$select_ruby_1_9"],
   }
     
   # we need to compile and install rwv2

@@ -34,8 +34,10 @@ inherits oddb_org {
   file{'/run/postgresql': # TODO: Not sure whether this is managed correctly by funtoo.
     ensure => directory,
     owner => 'postgres',
-    group => 'postgres',
-    mode  => 0777,
+    group => 'apache',
+    # this directory must be writable by oddb processes running under the apache group
+    # but we allow write access also to any user to be able to run psql for any user
+    mode  => 0666, 
     require =>  Package['postgresql-server'],                  
   }
   

@@ -116,6 +116,7 @@ class oddb_org::oddb_git(
   service{"oddb":
     ensure => running,
     provider => "daemontools",
+    path    => "$service_path",
     hasrestart => true,
     require    => [User['apache'], Exec["$oddb_setup_run", "$oddb_run"], ],
   }

@@ -16,7 +16,8 @@ LoadModule ruby_module /usr/lib/apache2/modules/mod_ruby.so
   ServerName <%= foostatus = scope.lookupvar('::oddb_org::server_name') %> 
   DirectoryIndex index.rbx
   RubyAddPath /var/www/oddb.org/src
-  RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>
+# does not work the first time, therefore use hard coded value  RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>
+  RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib
   RubyRequire 'sbsm/trans_handler'
   SetHandler ruby-object
   RubyTransHandler SBSM::FlavoredTransHandler.instance
