@@ -12,10 +12,7 @@ class oddb_org::oddb_git(
       provider => git,
       owner => "$oddb_user",
       group => "apache",
-      source => 'https://github.com/ngiger/oddb.org.git',
-      # source => 'https://github.com/zdavatz/oddb.org.git',
-      # cloning via git did not work!
-      # source => "git://scm.ywesee.com/oddb.org/.git ",
+      source => "git://scm.ywesee.com/oddb.org/.git",
       require => [User['apache'],],
   }  
   
