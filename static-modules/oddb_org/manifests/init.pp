@@ -85,9 +85,12 @@ class oddb_org(
       ],
     }
 
-   if !defined(User['apache']) {
-      user{'apache': require => Package['apache']}
-    }
+    # To be able to read the /run/postgresql directory, the apache user must belong
+    # to the group postgres. (Nota bene: all oddb processes run as apache
+    user{'apache': 
+      groups  => ['postgres'],
+      require => Package['apache'],
+    }    
     
     if !defined(Group['apache']) {
       group{'apache': require => Package['apache']}
