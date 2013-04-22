@@ -16,22 +16,20 @@ class oddb_org::oddb_git(
       require => [User['apache'],],
   }  
   
-  file {"$ODDB_HOME/doc":
+  package{ 'yus':
+    provider => gem,
+  }
+  
+  file { ["$ODDB_HOME/doc", "$ODDB_HOME/data", "$ODDB_HOME/log", "$ODDB_HOME/data/html",
+    "$ODDB_HOME/data/html/fachinfo", "$ODDB_HOME/data/html/fachinfo/de", "$ODDB_HOME/data/html/fachinfo/fr","$ODDB_HOME/data/html/fachinfo/en",
+    "$ODDB_HOME/data/html/patinfo",  "$ODDB_HOME/data/html/patinfo/de",  "$ODDB_HOME/data/html/patinfo/fr","$ODDB_HOME/data/html/patinfo/en",
+  ]:
     ensure  => directory,
     owner => "$oddb_user",
     group => "apache",
-    mode    => 0664, # must bewritable for oddb services and apache
+    mode    => 0664, # must be writable for $oddb_user and apache
     require => Vcsrepo["$ODDB_HOME"],
   }
-  
-  file {"$ODDB_HOME/data":
-    ensure  => directory,
-    owner => "$oddb_user",
-    group => "apache",
-    mode    => 0664, # must bewritable for oddb services and apache
-    require => Vcsrepo["$ODDB_HOME"],
-  }
-  
   package{ 'bundler':  provider => gem, }
    
   package{ 'tmail': provider => portage }
@@ -54,7 +52,7 @@ class oddb_org::oddb_git(
     path => "$path",
     require => [  Package['bundler', 'imagemagick', 'tmail'],
     Vcsrepo[$ODDB_HOME],
-# TODO:    Package['postgresql-base'], 
+    
     ],
   }
 

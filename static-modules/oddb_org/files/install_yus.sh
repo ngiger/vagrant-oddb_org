@@ -9,6 +9,5 @@ emerge =dev-ruby/dbi-0.4.3 =dev-ruby/dbd-pg-0.3.9 =dev-ruby/pg-0.13.2
 gem18 list --local
 head /usr/local/bin/yus* | grep bin >/opt/yus_installed_before_eselect.log
 eselect ruby set ruby19
-gem19 uninstall -x yus
 gem18 install yus
 head /usr/local/bin/yus* | grep bin >/opt/yus_installed.log

@@ -79,5 +79,20 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
     path => '/usr/local/bin:/usr/bin:/bin',
   }
+
+  $notification_patched = "$inst_logs/notification_rb_patched.okay"
+  $notification_rb_patch = "/usr/local/share/notification.rb.patch"
+  file{"$notification_rb_patch":
+    source => "puppet:///modules/oddb_org/notification.rb.patch.20130419.txt",
+    owner => 'root',
+    group => 'root',
+    mode  => 0755,
+  }
+  exec{ "$notification_patched":
+    command => "$apply_ruby_patch 1.9 lib/notification.rb $notification_rb_patch && touch $notification_patched",
+    creates => "$notification_patched",
+    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
+    path => '/usr/local/bin:/usr/bin:/bin',
+  }
   
 }

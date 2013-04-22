@@ -51,6 +51,15 @@ smtp_domain: ywesee.com
 smtp_user: ${email_user}
 smtp_pass: ${email_password}
 smtp_port: 587
+url_bag_sl_zip: http://bag.e-mediat.net/SL2007.Web.External/File.axd?file=XMLPublications.zip
+mail_from: '\"localtest Zeno\" <${email_user}>'
+mail_to:    ${email_user}
+text_info_newssource:  http://www.documed.ch/de/xml/fastonline.rss.php
+text_info_newssource2: http://compendium.ch/update/de
+text_info_searchform:  http://classic.compendium.ch/Search.aspx?lang=de
+text_info_searchform2: http://compendium.ch/search/de
+testenvironment1: /var/www/oddb.org/test/testenvironment1.rb
+testenvironment2: /var/www/oddb.org/test/testenvironment2.rb
 ",
     owner => 'root',
     group => 'root',
