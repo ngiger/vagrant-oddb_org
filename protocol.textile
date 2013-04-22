@@ -529,6 +529,69 @@ Using Zeno's information I changed all ODDB-Service to run under the apache user
 
 After adding the correct information under @/var/www/oddb/etc/oddb.yml@ and restarting the oddb service I was able to reset my password without any problem. Logout/login worked too.
 
+h2(18 April). Making daily import work
+
+Patch notification.rb.patch.20130419.txt to fix problem in notification added.
+
+Then the daily import sent the following emails to me:
+
+* ch.ODDB.org Report - Fach- und Patienteninfo Updates (swissmedicinfo.ch) - 04/2013
+
+bc. Stored 0 Fachinfos
+Ignored 0 Pseudo-Fachinfos
+Ignored 586 up-to-date Fachinfo-Texts
+Stored 0 Patinfos
+Ignored 0 up-to-date Patinfo-Texts
+
+* ch.ODDB.org Report - Fach- und Patienteninfo News - 04/2013
+
+bc. Searched for Vifor (International) AG
+Stored 6 Fachinfos
+Ignored 0 Pseudo-Fachinfos
+Ignored 0 up-to-date Fachinfo-Texts
+Stored 9 Patinfos
+Ignored 0 up-to-date Patinfo-Texts
+Checked 1 companies
+Vifor (International) AG
+Unknown Iks-Numbers: 0
+Fachinfos without iksnrs: 0
+
+* ch.ODDB.org Report - Error: swissmedic - 04/2013
+
+bc. lugin: ODDB::SwissmedicPlugin
+Error: NoMethodError
+Message: undefined method `values' for ", ":String
+Backtrace:
+/var/www/oddb.org/src/model/registration.rb:92:in `atc_classes'
+/usr/local/lib64/ruby/gems/1.9.1/gems/odba-1.1.0/lib/odba/stub.rb:112:in `method_missing'
+/var/www/oddb.org/src/plugin/swissmedic.rb:824:in `update_sequence'
+/var/www/oddb.org/src/plugin/swissmedic.rb:780:in `block in update_registrations'
+/var/www/oddb.org/src/plugin/swissmedic.rb:778:in `each'
+/var/www/oddb.org/src/plugin/swissmedic.rb:778:in `update_registrations'
+/var/www/oddb.org/src/plugin/swissmedic.rb:48:in `update'
+/var/www/oddb.org/src/util/updater.rb:375:in `block in update_swissmedic'
+/var/www/oddb.org/src/util/updater.rb:476:in `call'
+/var/www/oddb.org/src/util/updater.rb:476:in `wrap_update'
+/var/www/oddb.org/src/util/updater.rb:373:in `update_swissmedic'
+/var/www/oddb.org/src/util/updater.rb:195:in `run'
+/var/www/oddb.org/jobs/import_daily:13:in `block in <module:Util>'
+/var/www/oddb.org/src/util/job.rb:40:in `call'
+/var/www/oddb.org/src/util/job.rb:40:in `run'
+/var/www/oddb.org/jobs/import_daily:12:in `<module:Util>'
+/var/www/oddb.org/jobs/import_daily:11:in `<module:ODDB>'
+/var/www/oddb.org/jobs/import_daily:10:in `<main>'
+
+I tried to have use bin/admin but the things I tried took too long and as I had to work on other tasks. I did not even try to import a new database dump.
+
+h2(22 April). Upgrade to vagrant 1.1.5 causes problems
+
+In the meantime I switched for the elexis-vagrant project to use Vagrant 1.1.5, which was easier to setup to use a bridged network. Also it has installer images for Windows & MacOSX. Unfortunately it has the following nasty effects.
+
+* Funtoo provider has problems and cannot configure the network interfaces.
+* The disk format in ~/.vagrant.d has changed and it is a pain in the ass to switch between the two formats.
+
+Therefore decided to wait for a calmer period to debug the problem.
+
 
 h1. DB für medi
 
