@@ -531,7 +531,9 @@ After adding the correct information under @/var/www/oddb/etc/oddb.yml@ and rest
 
 h2(18 April). Making daily import work
 
-Patch notification.rb.patch.20130419.txt to fix problem in notification added.
+* Patch notification.rb.patch.20130419.txt to fix problem in notification added.
+* had to create a few directories for the 3 languages and fachinfo
+* oddb.org/test/testenvironment1.rb Mail address patched by hand. Better would be to copy the file to another location and start the import job with this (patched) copy. This would avoid checking customization info.
 
 Then the daily import sent the following emails to me:
 
