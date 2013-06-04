@@ -1,5 +1,6 @@
 #!/bin/sh
 # from https://github.com/purple52/librarian-puppet-vagrant
+logger "Running shell/main.sh"
 
 # Directory in which librarian-puppet should manage its modules directory
 if [ -d /vagrant ] ; then PUPPET_DIR=/vagrant ; else PUPPET_DIR=/etc/puppet ; fi

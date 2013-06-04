@@ -17,12 +17,12 @@ Vagrant::Config.run do |config|
   config.vm.boot_mode = :gui
   config.vm.provision :puppet, :options => "--debug"
   
-  config.vm.provision :puppet do |puppet|
-    # This shell provisioner installs librarian-puppet and runs it to install
-    # puppet modules. This has to be done before the puppet provisioning so that
-    # the modules are available when puppet tries to parse its manifests.
-    config.vm.provision :shell, :path => "shell/main.sh"
-    
+  # This shell provisioner installs librarian-puppet and runs it to install
+  # puppet modules. This has to be done before the puppet provisioning so that
+  # the modules are available when puppet tries to parse its manifests.
+  config.vm.provision :shell, :path => "shell/main.sh"
+  
+  config.vm.provision :puppet do |puppet|    
     # Now run the puppet provisioner. Note that the modules directory is entirely
     # managed by librarian-puppet
     puppet.manifests_path = "manifests"
