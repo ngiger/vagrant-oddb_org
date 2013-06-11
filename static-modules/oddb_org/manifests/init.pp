@@ -51,7 +51,7 @@ class oddb_org(
   $create_service_script = '/usr/local/bin/create_service.rb',
   $service_path          = '/var/lib/service'
 ) {
-
+    class {"postgresql::params": version => '8.4' }
     package{'daemontools': }
     package{'librarian-puppet':
       provider => gem,

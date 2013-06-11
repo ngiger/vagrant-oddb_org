@@ -8,6 +8,8 @@ class oddb_org::mail(
   $oddb_yml = "$ODDB_HOME/etc/oddb.yml", # needed of oddb_org::all
   
 ) inherits oddb_org::oddb_git {
+  ensure_packages(['git'])
+  
   $mail_package = 'ssmtp'
   file { '/etc/puppet/private':
     ensure => directory,
@@ -76,7 +78,9 @@ testenvironment2: /var/www/oddb.org/test/testenvironment2.rb
     path => "$path",
     user => "$oddb_user",
     cwd => "$inst_logs",
-    require => File[$inst_logs, $oddb_yml],
+    require => [ Package['git'], 
+      File[$inst_logs, $oddb_yml]
+    ],
   }
   
 }
