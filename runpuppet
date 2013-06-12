@@ -1,0 +1,6 @@
+#!/bin/bash -v
+# To be use on a vagrant machine
+if [ -d /vagrant ] ; then PUPPET_DIR=/vagrant ; else PUPPET_DIR=/etc/puppet ; fi
+cd $PUPPET_DIR
+./runlibrarian
+sudo -i puppet apply --modulepath $PUPPET_DIR/modules $*
