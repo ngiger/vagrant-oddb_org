@@ -16,5 +16,3 @@ mod "puppetlabs/stdlib"
 mod 'domcleal/augeasproviders'
 mod "puppetlabs/vcsrepo"
 mod 'oddb_org', :path => './static-modules/oddb_org'
-mod 'ripienaar/concat'
-mod 'postgresql', :path => './static-modules/puppet-postgresql'
