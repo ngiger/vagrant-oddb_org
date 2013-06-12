@@ -129,6 +129,14 @@ class oddb_org(
     }     
       
     package{"ruby-augeas": }
+    
+    file{ '/etc/gitconfig':
+    content => "# Managed by puppet vagrant
+[user]
+  name = Vagrant-oddb
+  email = root@localhost
+",
+    }
 
     host { "$server_name":
       ensure       => present,
@@ -172,14 +180,14 @@ fix_euro="yes"
     user => 'root',
     creates => "$select_ruby_1_9_okay",
     path => "$path",
-    require => File["$inst_logs"],
+    require => File["$inst_logs", '/etc/gitconfig'],
   }
 
   
   exec {"init_etckeeper":
-    command => "etckeeper init -d /etc",
+    command => "ln /var/lib/portage/world /etc/world && etckeeper init -d /etc && etckeeper commit 'first commit'",
     user => 'root',
-    creates => "/etc/.git",
+    creates => "/etc/world",
     path => "$path",
     require => Package["etckeeper"],
   }
