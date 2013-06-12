@@ -36,4 +36,6 @@ which eix
 if [ $? -ne 0 ] ; then emerge eix ; fi
 eix ruby-augeas | grep Installed
 if [ $? -ne 0 ] ; then emerge ruby-augeas ; fi
+gem list librarian-puppet | grep librarian-puppet
+if [ $? -ne 0 ] ; then gem install librarian-puppet --no-ri --no-rdoc ; fi
 
