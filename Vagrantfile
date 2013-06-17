@@ -43,6 +43,8 @@ Vagrant.configure("2") do |config|
     # Now run the puppet provisioner. Note that the modules directory is entirely
     # managed by librarian-puppet
     puppet.options        = '--debug'
+    puppet.hiera_config_path = File.join(File.dirname(__FILE__), 'hieradata', 'hiera.yaml')
+    puppet.working_directory = '/vagrant'
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "site.pp"
     puppet.module_path    = "modules"
@@ -56,8 +58,10 @@ Vagrant.configure("2") do |config|
     oddbFuntoo.vm.hostname = "oddb.#{`hostname -d`.chomp}"
 
     portBase ||= hieraCfg['::vagrant::portBase'] 
-    portBase ||= 44000 
-    oddbFuntoo.vm.network :private_network, ip: "192.168.50.#{portBase/1000}"
+    portBase ||= 44000
+    privateIp = hieraCfg['::oddb_org::ip']
+    privateIp ||= "192.168.50.#{portBase/1000}"
+    oddbFuntoo.vm.network :private_network, ip: privateIp 
     oddbFuntoo.vm.network :forwarded_port, guest: 22, host: portBase + 22  # ssh
     oddbFuntoo.vm.network :forwarded_port, guest: 80, host: portBase + 80  # apache
     if false
@@ -68,7 +72,8 @@ Vagrant.configure("2") do |config|
       #  config.hiera.data_path   = File.join(Dir.pwd, 'hieradata')
     else # use my workaround
       # config.vm.synced_folder "src/", "/srv/website"
-      config.vm.synced_folder "/etc/puppet/hieradata", File.join(File.dirname(__FILE__), 'hieradata') , disabled: true
+      # config.vm.synced_folder "/etc/puppet/hieradata", File.join(File.dirname(__FILE__), 'hieradata') , disabled: true
+      oddbFuntoo.vm.synced_folder File.join(File.dirname(__FILE__), 'hieradata'), "/etc/puppet/hieradata"
     end    
   end
   

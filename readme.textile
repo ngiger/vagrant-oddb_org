@@ -19,12 +19,17 @@ bc. "::oddb_org::mail::smtp_host":  smtp.provider.net:port
 "::oddb_org::mail::user":       user.account@provider.net
 "::oddb_org::mail::password":   topsecret_password
 "::oddb_org::hostname":         oddb.niklaus.org
-# don't change the following name. It seems that we can only work with the vagrant default
-"::oddb_org::ip":               10.0.2.15
+"::oddb_org::ip":               198.168.50.1
 '::oddb_org::username':         a_user
 '::oddb_org::root_name':        a_user@ywesee.com
 '::oddb_org::root_hash':        ec74c79bb6e82b4a0a448f6a1134d8fd4fd3c6ff40fd7ec58adee9805c757c00
  
+h3. Download an actual dump of the database
+
+You must have setup your acount for using @scp ywesee@thinpower.ywesee.com@
+
+* @./get_db_dumps.rb@
+
 h3. Start vagrant
 
 * @cd /path/to/clone/of/vagrant-oddb_org@
@@ -71,12 +76,16 @@ and create a definition for your host, e.g. using a logical link
 
 h3. How the funtoo-oddb basebox was created using veewee
 
-* @git clone git://github.com/jedi4ever/veewee.git@
-* @cd veewee@
-* Assure that the reference for vagrant is active in the Gemfile (Somebody made it inactive as per 2013-04-03)
-* @bundle update@
-* @mkdir -p definitions && cp -rp /path/to/vagrant-odd/definitions/funtoo-oddb definitions@
-* Edit definitions/funtoo-oddb/definition.rb to match the desired numbers of CPUs and memory
-* @vagrant basebox build  funtoo-oddb@ # may take an hour or more
-* @vagrant basebox export funtoo-oddb@
+bc. git clone git://github.com/ngiger/veewee.github
+cd veewee
+bundle install
+export name="funtoo-oddb-`date +%Y%m%d`"
+echo creating $name based on funtoo-latest-x86_64
+veewee vbox define  --force $name 'funtoo-latest-x86_64'
+cp -rpv /path/to/vagrant-oddb/definitions/funtoo-oddb/* definitions/${name}/veewee vbox build --force $name 2>&1 | tee $name.log
+veewee vbox export --force $name
+vagrant box add $name "$name.box"
+rm Vagrantfile
+vagrant init
+vagrant up
 
