@@ -1,53 +1,75 @@
-# see http://vagrantup.com
-# Copyright (c) Niklaus Giger, <niklaus.giger@member.fsf.org>
-# License: GPLv2
-# Boxes are stored under ~/.vagrant.d/boxes/
-
-boxUrl = 'http://ngiger.dyndns.org/downloads/funtoo-oddb.box'
-boxName     = 'funtoo-oddb'
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 require 'yaml'
+
+#------------------------------------------------------------------------------------------------------------
+# Some simple customization below
+#------------------------------------------------------------------------------------------------------------
+funtooName = 'funtoo-oddb-20130617'
+privateFuntoo = "/opt/src/veewee-ngiger/funtoo-oddb-20130617.box"
+funtooBox = File.exists?(privateFuntoo) ? privateFuntoo : "http://ngiger.dyndns.org/downloads/#{funtooName}.box"
+
+debianName = 'Elexis-Wheezy-amd64-20130510'
+privateDebian = "/opt/src/veewee-elexis/#{debianName}.box"
+debianBox = File.exists?(privateDebian) ? privateDebian : "http://ngiger.dyndns.org/downloads/#{debianName}.box"
+
+
+bridgedNetworkAdapter = "eth0" # adapt it to your liking, e.g. on MacOSX it might 
+# bridgedNetworkAdapter = "en0: Wi-Fi (AirPort)" # adapt it to your liking, e.g. on MacOSX it might 
 hieraCfg = YAML.load(File.open( 'hieradata/private/config.yaml' ) )
 
-Vagrant::Config.run do |config|
-  # Setup the box
-  config.vm.box = boxName
-  config.vm.box_url = boxUrl if defined?(boxUrl)
-  
-  # Boot with a GUI so you can see the screen. (Default is headless)
-  config.vm.boot_mode = :gui
-  config.vm.provision :puppet, :options => "--debug"
-  
+
+#------------------------------------------------------------------------------------------------------------
+# End of simple customization
+#------------------------------------------------------------------------------------------------------------
+# All Vagrant configuration is done here. The most common configuration
+# options are documented and commented below. For a complete reference,
+# please see the online documentation at vagrantup.com.
+
+# A good solution would be http://oddbfault.com/questions/418422/public-static-ip-for-vagrant-boxes
+
+Vagrant.configure("2") do |config| 
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", 6200, "--cpus", 2,  ]
+    vb.gui = true
+  end
+
   # This shell provisioner installs librarian-puppet and runs it to install
   # puppet modules. This has to be done before the puppet provisioning so that
   # the modules are available when puppet tries to parse its manifests.
   config.vm.provision :shell, :path => "shell/main.sh"
-  
   config.vm.provision :puppet do |puppet|    
     # Now run the puppet provisioner. Note that the modules directory is entirely
     # managed by librarian-puppet
+    puppet.options        = '--debug'
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "site.pp"
     puppet.module_path    = "modules"
   end
   
-  if false
-    # I cannot use the following three lines as specified by https://github.com/gposton/vagrant-hieradata
-    # because this lead to trying to install apt usinge puppetlabs repository  
-    #  config.hiera.config_path = File.join(Dir.pwd, 'hieradata')
-    #  config.hiera.config_file = 'hiera.yaml'
-    #  config.hiera.data_path   = File.join(Dir.pwd, 'hieradata')
-  else # use my workaround
-    config.vm.share_folder "hieradata", "/etc/puppet/hieradata", File.join(Dir.pwd, 'hieradata')
-  end
-  
+  config.vm.define :oddbFuntoo do |oddbFuntoo|  
+    oddbFuntoo.vm.box     = funtooName
+    oddbFuntoo.vm.box_url = funtooBox
+    oddbFuntoo.vm.provider :virtualbox do |vb| vb.name    = "oddb_funtoo" end
+    puts "Using funtooBox #{funtooBox}"
+    oddbFuntoo.vm.hostname = "oddb.#{`hostname -d`.chomp}"
 
-  # cannot specify an ip. Only works with the default of 10.0.2.15 of vagrant
-  #  config.vm.network :hostonly, hieraCfg['::oddb_org::ip']
-  config.vm.host_name     = hieraCfg['::oddb_org::hostname']
-  portBase ||= hieraCfg['::vagrant::portBase'] 
-  portBase ||= 44000 
-  config.vm.forward_port   22, portBase + 22  # ssh
-  config.vm.forward_port   80, portBase + 80  # apache
-  config.vm.forward_port   81, portBase + 81  # shoe project
+    portBase ||= hieraCfg['::vagrant::portBase'] 
+    portBase ||= 44000 
+    oddbFuntoo.vm.network :private_network, ip: "192.168.50.#{portBase/1000}"
+    oddbFuntoo.vm.network :forwarded_port, guest: 22, host: portBase + 22  # ssh
+    oddbFuntoo.vm.network :forwarded_port, guest: 80, host: portBase + 80  # apache
+    if false
+      # I cannot use the following three lines as specified by https://github.com/gposton/vagrant-hieradata
+      # because this lead to trying to install apt usinge puppetlabs repository  
+      #  config.hiera.config_path = File.join(Dir.pwd, 'hieradata')
+      #  config.hiera.config_file = 'hiera.yaml'
+      #  config.hiera.data_path   = File.join(Dir.pwd, 'hieradata')
+    else # use my workaround
+      # config.vm.synced_folder "src/", "/srv/website"
+      config.vm.synced_folder "/etc/puppet/hieradata", File.join(File.dirname(__FILE__), 'hieradata') , disabled: true
+    end    
+  end
   
 end

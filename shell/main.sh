@@ -26,9 +26,13 @@ emerge --sync && etc-update --automode -5
 # Initialize /etc/puppet/hiera.yaml
 df -h | grep hieradata
 if [ $? -eq 0  ] ; then
-  export HIERA_DATA=/`df -h | grep hieradata | cut -d / -f 2-`
-  if [ ! -L /etc/puppet/hiera.yaml ] ; then ln -s $HIERA_DATA/hiera.yaml /etc/puppet/hiera.yaml; fi
-  if [ ! -L /etc/hiera.yaml ]        ; then ln -s $HIERA_DATA/hiera.yaml /etc/hiera.yaml; fi
+  # export HIERA_DATA=/`df -h | grep hieradata | cut -d / -f 2-`
+  if [ ! -f /etc/puppet/hiera.yaml ] ; then ln -s $HIERA_DATA/hiera.yaml /etc/puppet/hiera.yaml; fi
+  if [ ! -f /etc/hiera.yaml ]        ; then ln -s $HIERA_DATA/hiera.yaml /etc/hiera.yaml; fi
+else
+  export HIERA_DATA=/vagrant/hieradata
+  if [ ! -f /etc/puppet/hiera.yaml ] ; then ln -s $HIERA_DATA/hiera.yaml /etc/puppet/hiera.yaml; fi
+  if [ ! -f /etc/hiera.yaml ]        ; then ln -s $HIERA_DATA/hiera.yaml /etc/hiera.yaml; fi
 fi
 
 # eix and ruby-augeas must also be installed before running puppet 
