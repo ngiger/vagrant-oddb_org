@@ -183,7 +183,30 @@ fix_euro="yes"
     require => File["$inst_logs", '/etc/gitconfig'],
   }
 
-  
+  file {'/etc/cron.daily/etckeeper':
+  content => '#!/bin/sh
+# managed by vagrant-oddb. copied from Debian
+set -e
+if [ -x /usr/bin/etckeeper ] && [ -e /etc/etckeeper/etckeeper.conf ]; then
+        . /etc/etckeeper/etckeeper.conf
+        if [ "$AVOID_DAILY_AUTOCOMMITS" != "1" ]; then
+                # avoid autocommit if an install run is in progress
+                lockfile=/var/cache/etckeeper/packagelist.pre-install
+                if [ -e "$pe" ] && [ -n "$(find "$lockfile" -mtime +1)" ]; then
+                        rm -f "$lockfile" # stale
+                fi
+                if [ ! -e "$lockfile" ]; then
+                        AVOID_SPECIAL_FILE_WARNING=1
+                        export AVOID_SPECIAL_FILE_WARNING
+                        if etckeeper unclean; then
+                                etckeeper commit "daily autocommit" >/dev/null
+                        fi
+                fi
+        fi
+fi',
+    mode => 0755,
+}
+
   exec {"init_etckeeper":
     command => "ln /var/lib/portage/world /etc/world && etckeeper init -d /etc && etckeeper commit 'first commit'",
     user => 'root',
