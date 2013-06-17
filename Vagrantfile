@@ -51,14 +51,14 @@ Vagrant.configure("2") do |config|
   end
   
   config.vm.define :oddbFuntoo do |oddbFuntoo|  
+    portBase ||= hieraCfg['::vagrant::portBase'] 
+    portBase ||= 44000
     oddbFuntoo.vm.box     = funtooName
     oddbFuntoo.vm.box_url = funtooBox
-    oddbFuntoo.vm.provider :virtualbox do |vb| vb.name    = "oddb_funtoo" end
+    oddbFuntoo.vm.provider :virtualbox do |vb| vb.name    = "oddb_#{portBase/1000}_funtoo" end
     puts "Using funtooBox #{funtooBox}"
     oddbFuntoo.vm.hostname = "oddb.#{`hostname -d`.chomp}"
 
-    portBase ||= hieraCfg['::vagrant::portBase'] 
-    portBase ||= 44000
     privateIp = hieraCfg['::oddb_org::ip']
     privateIp ||= "192.168.50.#{portBase/1000}"
     oddbFuntoo.vm.network :private_network, ip: privateIp 

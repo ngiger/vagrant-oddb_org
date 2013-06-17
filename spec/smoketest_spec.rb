@@ -51,19 +51,23 @@ describe "ch.oddb.org" do
     @browser.text.should_not match /Es tut uns leid/
   end
 
-  it "should have a link to the extended search" do
-    @browser.link(:text => /erweitert/).click
-    @browser.url.should match /gcc\/fachinfo_search/
+  it "should have a link to the migel" do
+    @browser.link(:text=>'MiGeL').click
+    @browser.text.should match /Pflichtleistung/
+    @browser.text.should match /Mittel und Gegenst/ # Mittel und Gegenstände
   end
   
   it "should find Aspirin" do
-    wait_until_text(@browser)
     @browser.text_field(:name, "search_query").set("Aspirin")
     @browser.button(:name, "search").click
-    wait_until_text(@browser)
     @browser.text.should match /Aspirin 500/
     @browser.text.should match /Aspirin Cardio 100/
     @browser.text.should match /Aspirin Cardio 300/
+  end
+  
+  it "should have a link to the extended search" do
+    @browser.link(:text => /erweitert/).click
+    @browser.url.should match /gcc\/fachinfo_search/
   end
   
   it "should find inderal" do
@@ -93,16 +97,19 @@ describe "ch.oddb.org" do
   
   it "should have a link to the english language versions" do
     @browser.link(:text=>'English').click
+    sleep(1)
     @browser.text.should match /Search for your favorite drug fast and easy/
   end
   
   it "should have a link to the french language versions" do
     @browser.link(:text=>'Français').click
+    sleep(1)
     @browser.text.should match /Comparez simplement et rapidement les prix des médicaments/
   end
 
   it "should have a link to the german language versions" do
     @browser.link(:text=>'Deutsch').click
+    sleep(1)
     @browser.text.should match /Vergleichen Sie einfach und schnell Medikamentenpreise./
   end
 

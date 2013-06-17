@@ -4,7 +4,6 @@ class { 'git': }
 
 class oddb_org::pg(
   $DB_NAME = hiera('::oddb_org::pg::name',                                            'oddb.org.ruby193'),
-  $DB_FILE = hiera('::oddb_org::pg::dump','http://pillbox.oddb.org/postgresql_database-oddb.org.ruby193-backup.gz')
 )
 inherits oddb_org {
 # puppetlabs-postgresql fails on funtoo
@@ -16,11 +15,12 @@ inherits oddb_org {
   
 #  class { 'postgresql::client':
 #    }
-  
+  $DB_DUMP = '/vagrant/db_dumps/pg-db-oddb.org.ruby193-backup.gz'
+
   package {'postgresql-server':
     ensure => $pg_server_version,
     }  
-  
+    
   $pg_oddb_db_load_script = "/usr/local/bin/pg_create_db.sh"
   file { "$pg_oddb_db_load_script":
     content => template("oddb_org/pg_create_db.sh.erb"),
@@ -28,7 +28,7 @@ inherits oddb_org {
     group => 'postgres',
     mode  => 0554,
     require => [Package['apache', 'postgresql-server'], ],
-    notify => Service['postgresql-8.4'],
+    notify => [Service['postgresql-8.4'], Exec["$pg_oddb_db_load_script"]],
   }
   
   file{'/run/postgresql': # TODO: Not sure whether this is managed correctly by funtoo.
@@ -49,7 +49,7 @@ inherits oddb_org {
   }
   
   $pg_oddb_loaded = "/opt/pg_oddb_loaded.okay"
-  exec{ "run_pg_oddb_loaded":
+  exec{ "$pg_oddb_db_load_script":
     command => "$pg_oddb_db_load_script && touch $pg_oddb_loaded",
     creates => "$pg_oddb_loaded",
     require => [ 
