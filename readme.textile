@@ -1,3 +1,5 @@
+{toc}
+
 h2. requirements
 
 * Ruby 1.9.3
@@ -37,6 +39,27 @@ h3. Start vagrant
 * @librarian-puppet install --clean@
 * @vagrant up@  # will take half an hour or so
 
+h3. Install nginx to be able to see the http://oddb.niklaus.org
+
+I used @sudo apt-get install nginx@ to install nging on my Debian system.
+
+Then I added a file @/etc/nginx/sites-available/oddb.niklaus.org.nginx@ with the following content:
+
+bc. server {
+  location / {
+    proxy_pass http://oddb.niklaus.org:55080/;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    }
+}
+
+I activated it with the following command.
+
+@cd  /etc/nginx/sites-enabled/ && ln -s ../sites-available/oddb.niklaus.org.nginx .@
+
+h3. Checking the installation
+
+@rake spec@ should run the integration test @spec/smoketest_spec.rb@.
 
 h2. installation into an already running funtoo server
 
@@ -53,7 +76,7 @@ bundle install
 librarian-puppet install --clean
 puppet apply
 
-h2. Testing changes
+h2. Testing changes in the puppet configuration
 
 If you want to test your configuration or your changes to manifests, the following might work for you
 
@@ -67,7 +90,7 @@ puppet apply modules/oddb_org/tests/yus.pp --verbose
 # debugging output
 puppet apply modules/oddb_org/tests/yus.pp --debug 
 
-h2. remarks
+h2. Remarks
 
 If you want to change the servername you have to edit the following file
 * hieradata/private/config.yml 
