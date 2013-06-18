@@ -130,11 +130,12 @@ class oddb_org(
       
     package{"ruby-augeas": }
     
+    $email_user     = hiera('::oddb_org::mail::user',      'put your username into hiera-data/private/config.yaml')
     file{ '/etc/gitconfig':
     content => "# Managed by puppet vagrant
 [user]
   name = Vagrant-oddb
-  email = root@localhost
+  email = $email_user
 ",
     }
 

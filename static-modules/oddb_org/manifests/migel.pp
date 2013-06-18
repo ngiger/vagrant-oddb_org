@@ -2,9 +2,9 @@
 # for ODDB.org 
 
 class oddb_org::migel(
-  $email_user     = hiera('::oddb_org::mail::user',      'put your username   into /tmp/hiera-data/private/config.yaml'),
-  $email_password = hiera('::oddb_org::mail::password',  'put your password   into /tmp/hiera-data/private/config.yaml'),
-  $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host  into /tmp/hiera-data/private/config.yaml'),
+  $email_user     = hiera('::oddb_org::mail::user',      'put your username into hiera-data/private/config.yaml'),
+  $email_password = hiera('::oddb_org::mail::password',  'put your password into hiera-data/private/config.yaml'),
+  $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host into hiera-data/private/config.yaml'),
 ) inherits oddb_org {
   include oddb_org::pg
 
