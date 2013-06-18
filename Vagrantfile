@@ -61,6 +61,11 @@ Vagrant.configure("2") do |config|
 
     privateIp = hieraCfg['::oddb_org::ip']
     privateIp ||= "192.168.50.#{portBase/1000}"
+    unless /\.#{portBase/1000}$/i.match(privateIp)
+      puts "portBase #{portBase/1000} should be last digits of ::oddb_org::ip in config.yaml but is #{privateIp}"
+      
+      exit
+    end
     oddbFuntoo.vm.network :private_network, ip: privateIp 
     oddbFuntoo.vm.network :forwarded_port, guest: 22, host: portBase + 22  # ssh
     oddbFuntoo.vm.network :forwarded_port, guest: 80, host: portBase + 80  # apache
