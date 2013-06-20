@@ -5,6 +5,7 @@ class oddb_org::migel(
   $email_user     = hiera('::oddb_org::mail::user',      'put your username into hiera-data/private/config.yaml'),
   $email_password = hiera('::oddb_org::mail::password',  'put your password into hiera-data/private/config.yaml'),
   $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host into hiera-data/private/config.yaml'),
+  $mail_to        = hiera('::oddb_org::mail_to',         'put mail_to  into hiera-data/private/config.yaml'),
 ) inherits oddb_org {
   include oddb_org::pg
 
@@ -70,10 +71,11 @@ db_user: 'postgres'
 db_auth: ''
 
 admins:
+  - ${mail_to}
 # - yasaka@ywesee.com
 # - zdavatz@ywesee.com
 mail_from: '\"localtest Zeno\" <${email_user}>'
-mail_to:    ${email_user}
+mail_to:    ${mail_to}
 smtp_server: ${mail_smtp_host}
 smtp_domain: ywesee.com
 smtp_user: ${email_user}

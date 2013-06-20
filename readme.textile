@@ -21,10 +21,14 @@ bc. "::oddb_org::mail::smtp_host":  smtp.provider.net:port
 "::oddb_org::mail::user":       user.account@provider.net
 "::oddb_org::mail::password":   topsecret_password
 "::oddb_org::hostname":         oddb.niklaus.org
-"::oddb_org::ip":               198.168.50.1
+'::vagrant::portBase':          44000
+"::oddb_org::ip":               198.168.50.44 # last must be portBase / 1000
+"::oddb_org::aliases":          [ "oddb", "another_alias_if_needed"]
 '::oddb_org::username':         a_user
+'::oddb_org::mail_to':          b_user@ywesee.com
 '::oddb_org::root_name':        a_user@ywesee.com
-'::oddb_org::root_hash':        ec74c79bb6e82b4a0a448f6a1134d8fd4fd3c6ff40fd7ec58adee9805c757c00
+'::oddb_org::root_pw':          topsecret_password
+ 
  
 h3. Download an actual dump of the database
 
