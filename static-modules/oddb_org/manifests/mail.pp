@@ -6,8 +6,10 @@ class oddb_org::mail(
   $mail_to        = hiera('::oddb_org::mail_to',         'put mail_to  into hiera-data/private/config.yaml'),
   $email_password = hiera('::oddb_org::mail::password',  'put your password into hiera-data/private/config.yaml'),
   $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host into hiera-data/private/config.yaml'),
+  $flickr_shared_secret = hiera('::oddb_org::flickr_shared_secret', 'put your flickr_shared_secret into hiera-data/private/config.yaml'),
+  $flickr_api_key       = hiera('::oddb_org::flickr_api_key',       'put your flickr_api_key into hiera-data/private/config.yaml'),
   $oddb_yml = "$ODDB_HOME/etc/oddb.yml", # needed of oddb_org::all
-  
+ 
 ) inherits oddb_org::oddb_git {
   $mail_package = 'ssmtp'
   file { '/etc/puppet/private':
@@ -61,6 +63,10 @@ text_info_searchform:  http://classic.compendium.ch/Search.aspx?lang=de
 text_info_searchform2: http://compendium.ch/search/de
 testenvironment1: /var/www/oddb.org/test/testenvironment1.rb
 testenvironment2: /var/www/oddb.org/test/testenvironment2.rb
+interaction_key: 'OD3DJ2EZ68LAZYL'
+flickr_shared_secret: '$flickr_shared_secret'
+flickr_api_key: '$flickr_api_key'
+app_user_agent: 'org.oddb.generikacc'
 ",
     owner => 'root',
     group => 'root',
