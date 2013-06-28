@@ -7,7 +7,7 @@ YUS_ROOT="<%= scope.lookupvar('yus_root') %>"
 ROOT_USER="<%= scope.lookupvar('root_name') %>"
 ROOT_PW="<%= scope.lookupvar('root_pw') %>"
 
-SHA_CMD= 'ruby18 /usr/local/lib64/ruby/gems/1.8/gems/yus-1.0.0/sha256.rb'
+SHA_CMD= 'ruby18 /usr/local/lib64/ruby/gems/1.8/gems/yus-1.0.1/sha256.rb'
 
 rsaFile = "#{YUS_ROOT}/data/#{RSA_NAME}_rsa"
 crtFile = "#{rsaFile}.crt"
@@ -39,6 +39,7 @@ def createYusYaml(rsaFile, crtFile)
     pwHash=line.chomp.split(': ')[-1]
               }
   puts "ROOT_PW pwHash ist <#{pwHash}>"
+  exit 2 unless pwHash.size > 10
 
   yus_yaml_content=%(# Managed by puppet in module oddb_org/manifests/yus.pp
 root_name: #{RSA_NAME}@ywesee.com
