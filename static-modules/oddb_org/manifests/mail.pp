@@ -2,12 +2,13 @@
 
 class { 'git': }
 class oddb_org::mail(
-  $email_user     = hiera('::oddb_org::mail::user',      'put your username into hiera-data/private/config.yaml'),
-  $mail_to        = hiera('::oddb_org::mail_to',         'put mail_to  into hiera-data/private/config.yaml'),
-  $email_password = hiera('::oddb_org::mail::password',  'put your password into hiera-data/private/config.yaml'),
-  $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host into hiera-data/private/config.yaml'),
-  $flickr_shared_secret = hiera('::oddb_org::flickr_shared_secret', 'put your flickr_shared_secret into hiera-data/private/config.yaml'),
-  $flickr_api_key       = hiera('::oddb_org::flickr_api_key',       'put your flickr_api_key into hiera-data/private/config.yaml'),
+  $email_user     = hiera('::oddb_org::mail::user',      'put your username into hieradata/private/config.yaml'),
+  $mail_to        = hiera('::oddb_org::mail_to',         'put mail_to  into hieradata/private/config.yaml'),
+  $email_password = hiera('::oddb_org::mail::password',  'put your password into hieradata/private/config.yaml'),
+  $mail_smtp_host = hiera('::oddb_org::mail::smtp_host', 'put your smtp_host into hieradata/private/config.yaml'),
+  $flickr_shared_secret = hiera('::oddb_org::flickr_shared_secret', 'put your flickr_shared_secret into hieradata/private/config.yaml'),
+  $flickr_api_key       = hiera('::oddb_org::flickr_api_key',       'put your flickr_api_key into hieradata/private/config.yaml'),
+  $hostname             = hiera('::oddb_org::hostname',      'put your hostname into hieradata/private/config.yaml'),
   $oddb_yml = "$ODDB_HOME/etc/oddb.yml", # needed of oddb_org::all
  
 ) inherits oddb_org::oddb_git {
@@ -18,7 +19,7 @@ class oddb_org::mail(
     group => 'root',
     mode => '0644',
   }
-  
+ 
   file { '/etc/ssmtp/revaliases':
   content => "# Managed by puppet oddb_org/manifests/mail.pp
 root:${email_user}
@@ -47,27 +48,9 @@ FromLineOverride=Yes
     mode => '0644',    
     require => Package[$mail_package],
 }
+   
   file {"$oddb_yml" :
-    content => "# Managed by puppet oddb_org/manifests/mail.pp
-smtp_server: ${mail_smtp_host}
-smtp_domain: ywesee.com
-smtp_user: ${email_user}
-smtp_pass: ${email_password}
-smtp_port: 587
-url_bag_sl_zip: http://bag.e-mediat.net/SL2007.Web.External/File.axd?file=XMLPublications.zip
-mail_from: '\"localtest Zeno\" <${email_user}>'
-mail_to:    [ ${mail_to} ] # must be an array!
-text_info_newssource:  http://www.documed.ch/de/xml/fastonline.rss.php
-text_info_newssource2: http://compendium.ch/update/de
-text_info_searchform:  http://classic.compendium.ch/Search.aspx?lang=de
-text_info_searchform2: http://compendium.ch/search/de
-testenvironment1: /var/www/oddb.org/test/testenvironment1.rb
-testenvironment2: /var/www/oddb.org/test/testenvironment2.rb
-interaction_key: 'OD3DJ2EZ68LAZYL'
-flickr_shared_secret: '$flickr_shared_secret'
-flickr_api_key: '$flickr_api_key'
-app_user_agent: 'org.oddb.generikacc'
-",
+    content => template('oddb_org/oddb.yml.erb'),
     owner => 'root',
     group => 'root',
     mode => '0644',    
@@ -78,7 +61,7 @@ app_user_agent: 'org.oddb.generikacc'
   # test_enrionments reads email_address via git. Therefore we need configure git for it
   $mail_configured = "$inst_logs/mail_server.okay"
   exec{ "$mail_configured":
-    command => "/bin/bash -c 'export HOME=$inst_logs && git config --global user.email $email_user && touch $mail_configured'",
+    command => "/bin/bash -c 'export HOME=$inst_logs && git config --global user.email \"$mail_to\" && touch $mail_configured'",
     creates => "$mail_configured",
     path => "$path",
     user => "$oddb_user",

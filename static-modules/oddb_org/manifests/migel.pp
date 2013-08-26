@@ -64,24 +64,7 @@ class oddb_org::migel(
   }
   
   file {"$migel_yml" :
-    content => "# Managed by puppet migel_org/manifests/migel.pp
----
-db_name: 'migel'
-db_user: 'postgres'
-db_auth: ''
-
-admins:
-  - ${mail_to}
-# - yasaka@ywesee.com
-# - zdavatz@ywesee.com
-mail_from: '\"localtest Zeno\" <${email_user}>'
-mail_to:    ${mail_to}
-smtp_server: ${mail_smtp_host}
-smtp_domain: ywesee.com
-smtp_user: ${email_user}
-smtp_pass: ${email_password}
-smtp_port: 587
-",
+    content => template('oddb_org/migel.yml.erb'),
     owner => 'root',
     group => 'root',
     mode => '0644',    

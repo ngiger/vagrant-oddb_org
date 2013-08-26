@@ -1,0 +1,13 @@
+# Managed by puppet migel_org/manifests/migel.pp
+---
+db_name: 'migel'
+db_user: 'postgres'
+db_auth: ''
+smtp_server: <%= scope.lookupvar('mail_smtp_host') %>
+smtp_domain: ywesee.com
+smtp_user:  <%= scope.lookupvar('email_user') %>
+smtp_pass:  <%= scope.lookupvar('email_password') %>
+smtp_port: 587
+mail_from: <%= scope.lookupvar('email_user') %>
+mail_to: <% receivers = scope.function_hiera(['::oddb_org::mail_to']) %>
+<% for receiver in receivers do %><%= "  - #{receiver}\n" %><% end %>
