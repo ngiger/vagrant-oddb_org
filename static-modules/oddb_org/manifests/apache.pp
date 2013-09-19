@@ -5,6 +5,8 @@ class oddb_org::apache(
 ) inherits oddb_org {
   include oddb_org::oddb_git
 
+  ensure_packages(['www-apache/mod_fastcgi', 'app-admin/cronolog'])
+  
   # we need an apache installation
   #  class {'apache':  } # puppetlabs-apache does not work on gentoo
     service{'apache2':
@@ -20,10 +22,46 @@ class oddb_org::apache(
       require => [ Package['apache'], ],
   }
   
+  notify{"Just created dummy directories for  webalizer": }
+  notify{"Don't enable FastCGI!!!": }
+  file { '/var/www/oddb.org/webalizer':
+    ensure => directory,
+    owner => 'apache',
+    group => 'apache',
+    mode  => 0644,
+    require => [ Package['apache'], ],
+  }
+  
+  file { ['/var/www/oddb.org/doc/sl_errors',
+'/var/www/oddb.org/webalizer/oddb',
+'/var/www/oddb.org/webalizer/mobile',
+'/var/www/oddb.org/webalizer/anthroposophika',
+'/var/www/oddb.org/webalizer/homoeopathika',
+'/var/www/oddb.org/webalizer/phyto-pharma',
+'/var/www/oddb.org/webalizer/just-medical',
+'/var/www/oddb.org/webalizer/santesuisse',
+'/var/www/oddb.org/webalizer/atupri',
+'/var/www/oddb.org/webalizer/atupri-web',
+'/var/www/oddb.org/webalizer/desitin',
+'/var/www/oddb.org/webalizer/provita',
+'/var/www/oddb.org/webalizer/oekk',
+'/var/www/oddb.org/webalizer/sympany',
+'/var/www/oddb.org/webalizer/swissmedic',
+'/var/www/oddb.org/webalizer/swissmedinfo',
+'/var/www/oddb.org/webalizer/generika',
+  ]:
+    ensure => directory,
+    owner => 'apache',
+    group => 'apache',
+    mode  => 0644,
+    require => [ Package['apache'], File ['/var/www/oddb.org/webalizer'] ],
+  }
   package{ 'sbsm':  provider => gem, }
   
   # TODO: fix /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.0.7/lib
-  # 02_oddb_vhost.conf.txt for Ruby 1.9.3 without Rockit 
+  # 02_oddb_vhost.conf.txt for Ruby 1.9.3 without Rockit
+  
+  $oddb_mainhost =  hiera('::oddb_org::hostname', '198.168.0.1')
   file { "/etc/apache2/vhosts.d/oddb.conf":
     content => template("oddb_org/oddb_vhost.conf.erb"),
     owner => 'apache',

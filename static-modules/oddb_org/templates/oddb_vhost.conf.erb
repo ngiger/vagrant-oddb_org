@@ -1,25 +1,605 @@
+# Maintained via Vagrant-oddb static-modules/oddb.org/templates/oddb_vhost.conf.erb
+<% oddb_mainhost = scope.lookupvar('oddb_mainhost') %>
+
 LoadModule ruby_module /usr/lib/apache2/modules/mod_ruby.so
+# FastCgiExternalServer /var/www/oddb.org/doc/index.fcgi -socket /var/tmp/ch.oddb.socket
+RewriteLock /var/lock/rewrite-lock 
+RubyAddPath /var/www/oddb.org/src
+# does not work the first time, therefore use hard coded value  RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>
+RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib
+
+#SetEnvIfNoCase User-Agent "Scooter" bad_bot
+<Directory /var/www/oddb.org/doc/sl_errors>
+  Options ExecCGI FollowSymlinks Indexes
+  IndexOptions NameWidth=*
+  AllowOverride None
+  Order allow,deny
+  Allow from all
+</Directory>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc/sl_errors
+  ServerName sl_errors.oddb.org
+</VirtualHost>
 
 <Directory /var/www/oddb.org/doc>
-        Options ExecCGI FollowSymlinks Indexes
-        AllowOverride None
-        Order allow,deny
-        Allow from all
+  Options ExecCGI
+  AllowOverride None
+  Order allow,deny
+  Allow from all
+  Deny from 194.209.25.108
+  #Deny from env=bad_bot
+  #Deny from 66.249.65.242
+  #Deny from 70.84.128.244
+  ErrorDocument 500 /var/www/oddb.org/doc/resources/errors/appdown.html
 </Directory>
-<Directory /var/www/oddb.org/data/css>
-        Order allow,deny
-        Allow from all
+
+<Directory /var/www/oddb.org/data/rss/>
+  Order allow,deny
+  Allow from all
 </Directory>
 
 <VirtualHost *:80>
   DocumentRoot /var/www/oddb.org/doc
-  ServerName <%= foostatus = scope.lookupvar('::oddb_org::server_name') %> 
+  ServerName <%= oddb_mainhost %>
   DirectoryIndex index.rbx
   RubyAddPath /var/www/oddb.org/src
-# does not work the first time, therefore use hard coded value  RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>
+  # does not work the first time, therefore use hard coded value  RubyAddPath <%= Dir.glob('/usr/local/**/ruby/gems/1.9*/gems/sbsm-*/lib')[0] %>
   RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib
+  RubyRequire 'util/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler ODDB::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/oddb/error_log /var/www/oddb.org/log/oddb/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/oddb/access_log /var/www/oddb.org/log/oddb/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR gcc
+  AddDefaultCharset UTF-8
+
+  RewriteEngine On
+  RewriteCond %{HTTP_USER_AGENT} iPhone
+  RewriteRule ^/(..)/([^/]+)/(.*)$ http://i.<%= oddb_mainhost %>/$1/mobile/$3 [R,L]
+  RewriteCond %{HTTP_USER_AGENT} iPhone
+  RewriteRule ^/(..)/([^/]+)/?$ http://i.<%= oddb_mainhost %>/$1/ [R,L]
+  RewriteCond %{HTTP_USER_AGENT} iPhone
+  RewriteRule ^/(..)/?$ http://i.<%= oddb_mainhost %>/$1/ [R,L]
+  RewriteCond %{HTTP_USER_AGENT} iPhone
+  RewriteRule ^/?$ http://i.<%= oddb_mainhost %>/ [R,L]
+
+  RedirectMatch ^/fr_ebook$ http://<%= oddb_mainhost %>/de/gcc/download/invoice/29466711/email/free_kindle_ebook@oddb.org/filename/compendium_<%= oddb_mainhost %>.kindle_fr_now.strip.mobi
+  RedirectMatch ^/de_ebook$ http://<%= oddb_mainhost %>/de/gcc/download/invoice/29466714/email/free_kindle_ebook@oddb.org/filename/compendium_<%= oddb_mainhost %>.kindle_now.strip.mobi
+
+  # Redirect Search-Engines
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(gcc)(.*) /$1/gcc$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName i.<%= oddb_mainhost %>
+  ServerAlias mobile.<%= oddb_mainhost %> i.oddb.org mobile.oddb.org
+  Options ExecCGI FollowSymlinks Indexes
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
   RubyRequire 'sbsm/trans_handler'
   SetHandler ruby-object
   RubyTransHandler SBSM::FlavoredTransHandler.instance
-  SetEnv DEFAULT_FLAVOR gcc
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/mobile/error_log /var/www/oddb.org/log/mobile/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/mobile/access_log /var/www/oddb.org/log/mobile/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR mobile
+  AddDefaultCharset UTF-8
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(mobile)(.*) /$1/mobile$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteEngine On
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName anthroposophika.ch
+  ServerAlias www.anthroposophika.ch anthroposophika.oddb.org www.anthroposophica.ch anthroposophy.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/anthroposophika/error_log /var/www/oddb.org/log/anthroposophika/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/anthroposophika/access_log /var/www/oddb.org/log/anthroposophika/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR anthroposophy
+  AddDefaultCharset UTF-8
+  Alias /favicon.ico /var/www/oddb.org/doc/resources/anthroposophy/favicon.ico
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  #RewriteRule ^/(..)/(gcc)(.*) http://anthroposophika.ch/$1/anthroposophy$3 [R,L]
+  RewriteCond %{HTTP_HOST}   !^anthroposophika\.ch [NC]
+  RewriteCond %{HTTP_HOST}   !^$
+  RewriteRule ^/?(.*)         http://anthroposophika.ch/$1 [L,R,NE]
+
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(anthroposophy)(.*) /$1/anthroposophy$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName xn--homopathika-tfb.ch
+  ServerAlias www.xn--homopathika-tfb.ch homoeopathika.oddb.org xn--homopathika-tfb.oddb.org homeopathy.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/homoeopathika/error_log /var/www/oddb.org/log/homoeopathika/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/homoeopathika/access_log /var/www/oddb.org/log/homoeopathika/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR homeopathy
+  AddDefaultCharset UTF-8
+  Alias /favicon.ico /var/www/oddb.org/doc/resources/homeopathy/favicon.ico
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  #RewriteRule ^/(..)/(gcc)(.*) http://xn--homopathika-tfb.ch/$1/homeopathy$3 [R,L]
+  RewriteCond %{HTTP_HOST}   !^xn--homopathika-tfb\.ch [NC]
+  RewriteCond %{HTTP_HOST}   !^$
+  RewriteRule ^/?(.*)         http://xn--homopathika-tfb.ch/$1 [L,R,NE]
+
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(homeopathy)(.*) /$1/homeopathy$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName phyto-pharma.ch
+  ServerAlias www.phyto-pharma.ch phytotherapeutika.ch www.phytotherapeutika.ch phyto-pharma.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/phyto-pharma/error_log /var/www/oddb.org/log/phyto-pharma/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/phyto-pharma/access_log /var/www/oddb.org/log/phyto-pharma/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR phyto-pharma
+  AddDefaultCharset UTF-8
+  Alias /favicon.ico /var/www/oddb.org/doc/resources/phyto-pharma/favicon.ico
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST}   !^phyto-pharma\.ch [NC]
+  RewriteCond %{HTTP_HOST}   !^$
+  RewriteRule ^/?(.*)         http://phyto-pharma.ch/$1 [L,R,NE]
+
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(phyto-pharma)(.*) /$1/phyto-pharma$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+</VirtualHost>
+
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName just-medical.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/just-medical/error_log /var/www/oddb.org/log/just-medical/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/just-medical/access_log /var/www/oddb.org/log/just-medical/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR just-medical
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(just-medical)(.*) /$1/just-medical$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName santesuisse.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/santesuisse/error_log /var/www/oddb.org/log/santesuisse/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/santesuisse/access_log /var/www/oddb.org/log/santesuisse/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR santesuisse
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(santesuisse)(.*) /$1/santesuisse$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName atupri.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/atupri/error_log /var/www/oddb.org/log/atupri/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/atupri/access_log /var/www/oddb.org/log/atupri/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR atupri
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(atupri-web)(.*) http://atupri-web.oddb.org/$1/atupri-web$3 [R,L]
+  RewriteRule ^/(..)/(atupri)(.*) /$1/atupri$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName atupri-web.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/atupri-web/error_log /var/www/oddb.org/log/atupri-web/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/atupri-web/access_log /var/www/oddb.org/log/atupri-web/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR atupri-web
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(atupri-web)(.*) /$1/atupri-web$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName desitin.<%= oddb_mainhost %>
+  ServerAlias desitin.oddb.org *.epilepsie-generika.ch epilepsie-generika.ch *.epilepsie-generika.li epilepsie-generika.li *.epilepsie-medikament.ch epilepsie-medikament.ch *.epilepsie-therapie.ch epilepsie-therapie.ch
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/desitin/error_log /var/www/oddb.org/log/desitin/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/desitin/access_log /var/www/oddb.org/log/desitin/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR desitin
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/(gcc)(.*) http://desitin.oddb.org/$1/desitin$3 [R,L]
+
+  RewriteRule ^/?$ /de/desitin/search/zone/drugs/search_query/desitin/search_type/st_company [L,QSA,PT,NE]
+  RewriteRule ^/(..)/?$ /$1/desitin/search/zone/drugs/search_query/desitin/search_type/st_company [L,QSA,PT,NE]
+  RewriteRule ^/(..)/desitin/home /$1/desitin/search/zone/drugs/search_query/desitin/search_type/st_company [L,QSA,PT,NE]
+  RewriteRule ^/(..)/(desitin)(.*) /$1/desitin$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #
+  #RewriteRule ^/(..)/?$ /index.fcgi?${flavored:/$1/desitin/search/zone/drugs/search_query/desitin/search_type/st_company} [L,QSA,PT,NE]
+  #RewriteRule ^/(..)/[^/]+/home /index.fcgi?${flavored:/$1/desitin/search/zone/drugs/search_query/desitin/search_type/st_company} [L,QSA,PT,NE]
+  #RewriteRule ^/?$ /index.fcgi?${flavored:/de/desitin/search/zone/drugs/search_query/desitin/search_type/st_company} [L,QSA,PT,NE]
+  #
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName provita.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/provita/error_log /var/www/oddb.org/log/provita/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/provita/access_log /var/www/oddb.org/log/provita/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR provita
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(provita)(.*) /$1/provita$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName oekk.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/oekk/error_log /var/www/oddb.org/log/oekk/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/oekk/access_log /var/www/oddb.org/log/oekk/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR oekk
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(oekk)(.*) /$1/oekk$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName swissmedic.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/swissmedic/error_log /var/www/oddb.org/log/swissmedic/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/swissmedic/access_log /var/www/oddb.org/log/swissmedic/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR swissmedic
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(swissmedic)(.*) /$1/swissmedic$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName swissmedinfo.oddb.org
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/swissmedinfo/error_log /var/www/oddb.org/log/swissmedinfo/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/swissmedinfo/access_log /var/www/oddb.org/log/swissmedinfo/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR swissmedinfo
+  AddDefaultCharset UTF-8
+
+  Alias /robots.txt /var/www/oddb.org/doc/robots.txt
+
+  RewriteEngine On
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(swissmedinfo)(.*) /$1/swissmedinfo$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/doc
+  ServerName generika.oddb.org
+  ServerAlias *.generika.cc generika.cc *.nachahmer.ch nachahmer.ch 
+  DirectoryIndex index.rbx
+  RubyAddPath /var/www/oddb.org/src
+  RubyRequire 'sbsm/trans_handler'
+  SetHandler ruby-object
+  RubyTransHandler SBSM::FlavoredTransHandler.instance
+  ErrorLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/generika/error_log /var/www/oddb.org/log/generika/%Y/%m/%d/error_log"
+  CustomLog "|/usr/sbin/cronolog -l /var/www/oddb.org/log/generika/access_log /var/www/oddb.org/log/generika/%Y/%m/%d/access_log" combined
+  SetEnv DEFAULT_FLAVOR generika
+  AddDefaultCharset UTF-8
+  Alias /favicon.ico /var/www/oddb.org/doc/resources/generika/favicon.ico
+
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST}   !^generika\.cc [NC]
+  RewriteCond %{HTTP_HOST}   !^$
+  RewriteRule ^/?(.*)         http://generika.cc/$1 [L,R,NE]
+
+  RewriteRule ^/(..)/?$ /$1/ [PT]
+  RewriteRule ^/(..)/(generika)(.*) /$1/generika$3 [PT]
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://$2.oddb.org/$1/$2/$3 [R,L]
+  #RewriteMap flavored prg:/home/ywesee/git/sbsm/bin/sbsm-rewrite-flavored
+  #RewriteRule ^/?$ /index.fcgi [L,QSA,PT,NE]
+  #RewriteRule ^/..$ /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+  #RewriteRule ^/../.* /index.fcgi?${flavored:$0} [L,QSA,PT,NE]
+
+</VirtualHost>
+
+## webalizer
+<Directory "/var/www/oddb.org/webalizer">
+Options None
+  AllowOverride None
+  Order allow,deny
+  Allow from all
+</Directory>
+
+<Directory "/var/www/oddb.org/webalizer/oddb">
+  AuthUserFile /var/www/oddb.org/etc/htaccess
+  AuthName "oddb.org statistics"
+  AuthType Basic
+  Require valid-user
+</Directory>
+
+<VirtualHost *:80>
+  ServerName webalizer.oddb.org
+  Redirect / http://webalizer.<%= oddb_mainhost %>/
+</VirtualHost>
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/oddb
+  ServerName webalizer.<%= oddb_mainhost %>
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/mobile
+  ServerName webalizer.i.<%= oddb_mainhost %>
+  ServerAlias webalizer.i.oddb.org webalizer.i.mobile.oddb.org webalizer.mobile.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/anthroposophika
+  ServerName webalizer.anthroposophika.ch
+  ServerAlias webalizer.anthroposophika.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/homoeopathika
+  ServerName webalizer.xn--homopathika-tfb.ch
+  ServerAlias webalizer.xn--homopathika-tfb.oddb.org webalizer.homoeopathika.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/phyto-pharma
+  ServerName webalizer.phyto-pharma.ch
+  ServerAlias webalizer.phytotherapeutika.ch webalizer.phyto-pharma.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/just-medical
+  ServerName webalizer.just-medical.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/santesuisse
+  ServerName webalizer.santesuisse.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/atupri
+  ServerName webalizer.atupri.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/atupri-web
+  ServerName webalizer.atupri-web.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/desitin
+  ServerName webalizer.desitin.<%= oddb_mainhost %>
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/provita
+  ServerName webalizer.provita.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/oekk
+  ServerName webalizer.oekk.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/sympany
+  ServerName webalizer.sympany.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/swissmedic
+  ServerName webalizer.swissmedic.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/swissmedinfo
+  ServerName webalizer.swissmedinfo.oddb.org
+  DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot /var/www/oddb.org/webalizer/generika
+  ServerName webalizer.generika.oddb.org
+  ServerAlias webalizer.generika.cc
+  DirectoryIndex index.html
+</VirtualHost>
+
+## default virtual host for *.oddb.org needs to be at the end of the configuration
+<VirtualHost *:80>
+  ServerName www.oddb.org
+  ServerAlias oddb.org www.<%= oddb_mainhost %> *.oddb.org new.<%= oddb_mainhost %> ramaze.<%= oddb_mainhost %>
+  RewriteEngine On
+  RewriteRule ^/(..)/([^/]*)/?(.*) http://<%= oddb_mainhost %>/$1/gcc/$3 [R,L]
+  Redirect / http://<%= oddb_mainhost %>/
 </VirtualHost>
