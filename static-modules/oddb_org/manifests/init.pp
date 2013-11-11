@@ -127,9 +127,7 @@ class oddb_org(
       ensure => present,
       system => false,
     }     
-      
-    package{"ruby-augeas": }
-    
+          
     $email_user     = hiera('::oddb_org::mail::user',      'put your username into hiera-data/private/config.yaml')
     file{ '/etc/gitconfig':
     content => "# Managed by puppet vagrant
@@ -137,15 +135,6 @@ class oddb_org(
   name = Vagrant-oddb
   email = $email_user
 ",
-    }
-
-    host { "$server_name":
-      ensure       => present,
-      ip           => hiera('::oddb_org::ip', '198.168.0.1'),
-      host_aliases => hiera('::oddb_org::aliases', 'oddb'),
-      comment      => "Needed to run bin/oddb",
-      provider     => augeas,
-      require      => Package["ruby-augeas"],
     }
 
     file{'/etc/conf.d/keymaps':

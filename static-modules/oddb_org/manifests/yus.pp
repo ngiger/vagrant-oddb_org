@@ -10,10 +10,6 @@ class oddb_org::yus(
   $yus_grant_user = "$inst_logs/yus_grant_user.okay" # needed for oddb_org::all
 ) inherits oddb_org::pg {
 
-  package{'ruby-password':
-    ensure => present,
-  }
-  
   # run RUBYOPT=-rauto_gem rvm system do ruby /usr/local/bin/dbi_test.rb
   file {'/usr/local/bin/dbi_test.rb':
     source => "puppet:///modules/oddb_org/dbi_test.rb",
@@ -100,9 +96,24 @@ exit 0",
     user => 'postgres',
   }
   
+  $yus_18_start     = "/usr/local/bin/yusd18"
+	file { "$yus_18_start":
+			ensure => present,
+			content => '#/bin/bash
+cd /usr/local/src/yus
+export BINDIR=/usr/local/ruby18/bin
+ruby18 $BINDIR/bundle exec ruby18 bin/yusd
+',
+      owner => "$oddb_user",
+      group => "$oddb_group",
+      require => User["$oddb_user"],
+      mode => '0775',
+	}
+
+
   $yus_run     = "/var/lib/service/yus/run"
   exec{ "$yus_run":
-    command => "$create_service_script root yus 'ruby18 /usr/local/bin/yusd'",
+    command => "$create_service_script root yus $yus_18_start",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       File["$create_service_script"],

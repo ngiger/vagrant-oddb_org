@@ -1,13 +1,16 @@
 #!/bin/bash -v
 eselect ruby set ruby18
+emerge ruby-termios
+export BINDIR="/usr/local/ruby18/bin"
 export RUBYOPT="-rauto_gem"
-# We want to ensure that the following three gems are installed via emerge for gem18
-gem18 uninstall -x --all dbi dbd-pg pg 
-gem18 install --no-ri --no-rdoc deprecated --version=2.0.1
-gem18 install --no-ri --no-rdoc yus rclconf odba needle ruby-password activesupport
-emerge =dev-ruby/dbi-0.4.3 =dev-ruby/dbd-pg-0.3.9 =dev-ruby/pg-0.13.2
-gem18 list --local
-head /usr/local/bin/yus* | grep bin >/opt/yus_installed_before_eselect.log
+export DEST=/usr/local/src/yus
+# We want to ensure that the following three gems are installed via emerge for $gem_1_8
+gem18 install --no-ri --no-rdoc bundler --bindir=$BINDIR
+mkdir -p `dirname $DEST` $BINDIR `dirname $DEST`
+git clone https://github.com/zdavatz/yus.git $DEST
+cd $DEST
+BUNDLE_SYSTEM_BINDIR=${BINDIR}/bin ${BINDIR}/bundle install --without test development 2>&1 | tee /opt/yus_installed_ruby18.log
 eselect ruby set ruby19
-gem18 install yus
-head /usr/local/bin/yus* | grep bin >/opt/yus_installed.log
+gem install bundler 
+bundle install --without test development 2>&1 | tee /opt/yus_installed_ruby19.log
+head /usr/local/bin/yus*  ${BINDIR}/yus* | grep bin >/opt/yus_installed.log
