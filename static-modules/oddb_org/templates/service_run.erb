@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+ulimit -v 10240000
+cd <%= scope.lookupvar('working_dir') %>
+exec sudo -u <%= scope.lookupvar('user') %> <%= scope.lookupvar('exec') %> <%= scope.lookupvar('arguments') %>
