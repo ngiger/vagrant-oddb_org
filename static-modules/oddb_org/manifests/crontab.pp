@@ -4,28 +4,58 @@
 class oddb_org::crontab(
 ) inherits oddb_org {
 
-  ensure_packages(['vixie-cron', 'syslog-ng', 'logrotate', 'ntp'])
+  ensure_packages(['cronbase', 'vixie-cron', 'syslog-ng', 'logrotate', 'ntp'])
+  service{'vixie-cron':
+    ensure => running,
+    require => Package['vixie-cron'],
+  }
   
-  define oddb_org::crontab::add_crontab($job_path = '/etc/cron.daily', $working_dir, $user, $exec, $arguments) {
-    file {"$svc_path/$title":
-      ensure => directory
-    }
-    file{"$svc_path/$title/run":
+  define oddb_org::crontab::add_crontab(
+    $job_path     = '/etc/cron.daily', 
+    $working_dir  = "$ODDB_HOME", 
+    $user         = "$oddb_user",
+    $exec         = 'bundle install &>/dev/null && bundle exec ruby', 
+    $arguments    = "jobs/$title") {
+
+    file{"$job_path/$title":
       ensure  => present,
       mode    => 0754,
-      content => template('oddb_org/service_run.erb'),
-      require => File["$svc_path/$title"],
+      content => template('oddb_org/crontab_job.erb'),
     }
-    service{"$title":
-      ensure => running,
-      provider => "daemontools",
-      path    => "$service_path",
-      hasrestart => true,
-      subscribe  => File["$svc_path/$title/run"],
-      require    => File["$svc_path/$title/run"],
-    }
-  }    
+  }
+  
+  # daily jobs
+  oddb_org::crontab::add_crontab{'export_daily': }
+  oddb_org::crontab::add_crontab{'export_fachinfo_yaml': }
+  oddb_org::crontab::add_crontab{'export_patinfo_yaml': }
+  oddb_org::crontab::add_crontab{'import_daily': }
+  oddb_org::crontab::add_crontab{'mail_index_therapeuticus_csv': }
 
+  # seldom running jobs via cron
+  # run ch.oddb migel-products updates 1st of January and 1st of June (run the BAG update via NovaCantica manually)
+  oddb_org::crontab::add_crontab{'update_migel_products_with_report': job_path => '/usr/local/bin' }
+
+  cron { bag_update_january:
+    command   => "/usr/local/bin/update_migel_products_with_report",
+    user      => $oddb_user,
+    hour      => 0,
+    minute    => 1,
+    monthday  => 1,
+    month     => 1,    
+  }
+  cron { bag_update_june:
+    command   => "/usr/local/bin/update_migel_products_with_report",
+    user      => $oddb_user,
+    hour      => 0,
+    minute    => 1,
+    monthday  => 1,
+    month     => 6,    
+  }
+  
+ # missing /usr/local/sbin/ywesee-backup
+ # missing /usr/local/bin/update_vhost_stats
+
+  
   file { "/usr/local/bin/ruby":
     ensure => '/usr/bin/ruby',    
   }
@@ -33,14 +63,8 @@ class oddb_org::crontab(
     ensure => '/usr/bin/ruby',    
   }
   
-  file { "/etc/crontab":
-    source => "puppet:///modules/oddb_org/crontab.txt",
-    mode  => 0644,
-    require =>  Package['vixie-cron'],
-  }
- 
   file {'/etc/logrotate.d/oddb':
-    chmod => 0644,
+    mode => 0644,
     content => "
 /var/log/oddb/*
 {
@@ -56,7 +80,7 @@ class oddb_org::crontab(
   }
   
   file {'/etc/logrotate.d/rsyslog':
-    chmod => 0644,
+    mode => 0644,
     content => "/var/log/syslog
 {
         rotate 7
@@ -81,7 +105,6 @@ class oddb_org::crontab(
 /var/log/lpr.log
 /var/log/cron.log
 /var/log/debug
-/var/log/messages
 {
         rotate 4
         weekly
@@ -96,12 +119,5 @@ class oddb_org::crontab(
 }
 ",
   }
-  
- exec { "crontab /etc/crontab":
-  path   => "/usr/bin:/usr/sbin:/bin",
-  require => [File['/etc/crontab', '/etc/logrotate.d/rsyslog', '/etc/logrotate.d/oddb'],],
- }
- # missing /usr/local/sbin/ywesee-backup
- # missing /usr/local/bin/update_vhost_stats
 
 }

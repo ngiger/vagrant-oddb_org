@@ -1,0 +1,8 @@
+#!/bin/sh
+exec 2>&1
+ulimit -v 10240000
+mkdir -p /var/log/oddb
+me=`basename $0`
+chown <%= scope.lookupvar('user') %> /var/log/oddb /var/log/oddb/$me.log
+cd <%= scope.lookupvar('working_dir') %>
+exec sudo -u <%= scope.lookupvar('user') %> sh -c "<%= scope.lookupvar('exec') %> <%= scope.lookupvar('arguments') %> &> /var/log/oddb/$me.log"

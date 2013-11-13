@@ -97,7 +97,7 @@ describe "ch.oddb.org" do
   
   it "should have a link to the english language versions" do
     @browser.link(:text=>'English').click
-    sleep(1)
+    sleep(1) # or should I use something like b.wait_until {b.text.include? /Search for your favorite drug fast and easy/ }
     @browser.text.should match /Search for your favorite drug fast and easy/
   end
   

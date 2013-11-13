@@ -1,6 +1,8 @@
 #!/bin/bash -v
 # To be use on a vagrant machine
 if [ -d /vagrant ] ; then PUPPET_DIR=/vagrant ; else PUPPET_DIR=/etc/puppet ; fi
+if [ -f Puppetfile ] ; then PUPPET_DIR=`pwd` ; fi
+echo PUPPET_DIR is $PUPPET_DIR
 cd $PUPPET_DIR
-./runlibrarian
-sudo -i puppet apply --modulepath $PUPPET_DIR/modules --hiera_config /etc/hiera.yaml $*
+bash ./runlibrarian
+sudo -i puppet apply --modulepath $PUPPET_DIR/modules --hiera_config $PUPPET_DIR/hieradata/hiera.yaml $*

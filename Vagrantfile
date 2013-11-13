@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 require 'yaml'
+Vagrant.require_plugin 'vagrant-vbox-snapshot'
 
 #------------------------------------------------------------------------------------------------------------
 # Some simple customization below
@@ -28,10 +29,16 @@ hieraCfg = YAML.load(File.open( 'hieradata/private/config.yaml' ) )
 
 # A good solution would be http://oddbfault.com/questions/418422/public-static-ip-for-vagrant-boxes
 
+
 Vagrant.configure("2") do |config| 
 
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", 6200, "--cpus", 2,  ]
+    # 6000 break after import_daily FI
+    # 9000 break after import_daily PI
+    puts "cpus auf 3/ioapc gestell"
+    vb.customize ["modifyvm", :id, "--memory", 10000 ]
+    vb.customize ["modifyvm", :id, "--cpus", "3"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
     vb.gui = true
   end
 
@@ -58,6 +65,7 @@ Vagrant.configure("2") do |config|
     oddbFuntoo.vm.provider :virtualbox do |vb| vb.name    = "oddb_#{portBase/1000}_funtoo" end
     puts "Using funtooBox #{funtooBox}"
     oddbFuntoo.vm.hostname = "oddb.#{`hostname -d`.chomp}"
+    puts oddbFuntoo.vm.hostname
 
     privateIp = hieraCfg['::oddb_org::ip']
     privateIp ||= "192.168.50.#{portBase/1000}"
@@ -66,7 +74,11 @@ Vagrant.configure("2") do |config|
       
       exit
     end
+    puts "IP ist " + privateIp
+   
     oddbFuntoo.vm.network :private_network, ip: privateIp 
+    # oddbFuntoo.vm.network :public_network, { :mac => '000000250122', :ip => '172.25.1.22' } # dhcp from fest
+#    oddbFuntoo.vm.network :private_network, { :mac => '000000250122', :ip => '172.25.1.22' } # dhcp from fest
     oddbFuntoo.vm.network :forwarded_port, guest: 22, host: portBase + 22  # ssh
     oddbFuntoo.vm.network :forwarded_port, guest: 80, host: portBase + 80  # apache
     if false
