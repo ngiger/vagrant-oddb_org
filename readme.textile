@@ -70,18 +70,27 @@ h3. Checking the installation
 
 h2. installation into an already running funtoo server
 
+Postgresql 8.x has a "bug 5680":https://groups.google.com/forum/#!topic/pgsql.bugs/SnqwEbhewtQ
+that it cannot be configured when it finds under /usr/share/zoneinfo/ a logical link like
+"posix -> .". Please remove any such links beforehand. 
+
 These steps have not yet been verified. Ask Niklaus if it does not work! They must be run as root
 
-bc. emerge puppet  # ensure that version 3.1 or higher is installed
-emerge ruby-augeas  # this must also be installed before running puppet to avoid errors
+bc. emerge ruby-augeas  # this must also be installed before running puppet to avoid errors
 mv /etc/puppet /etc/puppet.backup
 git clone git://github.com/ngiger/vagrant-oddb_org.git /etc/puppet
-mkdir /etc/puppet/private
-vim etc/puppet/private/config.yml # see section "Create and edit your configuration"
+mkdir /etc/puppet/hieradata/private
+vim etc/puppet/private/config.yaml # see section "Create and edit your configuration"
 cd /etc/puppet
+eselect ruby set ruby19
+gem install bundler 
+gem puppet --version=3.1.1  # ensure that version 3.1 or higher is installed
 bundle install
+gem install librarian-puppet 
 librarian-puppet install --clean
-puppet apply
+ln -s /etc/puppet/hieradata/hiera.yaml /etc/
+ln -s /etc/puppet/hieradata/hiera.yaml /etc/puppet
+puppet apply manifests/site.pp 2>&1 | tee /var/log/puppet_`date +%Y%m%d%H%M`.log
 
 h2. Testing changes in the puppet configuration
 

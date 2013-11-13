@@ -8,6 +8,7 @@ class oddb_org::yus(
   $yus_root   = "/etc/yus",
   $yus_data   = "/etc/yus/data",
   $yus_grant_user = "$inst_logs/yus_grant_user.okay" # needed for oddb_org::all
+  $sha_cmd        = '/usr/local/bin/sha256.rb'
 ) inherits oddb_org::pg {
 
   # run RUBYOPT=-rauto_gem rvm system do ruby /usr/local/bin/dbi_test.rb
@@ -34,7 +35,7 @@ class oddb_org::yus(
       require => [ User["$oddb_user"], Group["$oddb_group"],File["$yus_root"] ],
   }
     
-  file {'/usr/local/bin/sha256.rb':
+  file {"$sha_cmd":
       content => "#!/usr/bin/env ruby
 require 'digest/sha2'
 print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
@@ -167,6 +168,7 @@ ruby18 $BINDIR/bundle exec ruby18 bin/yusd
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
       Exec["$yus_create_yml"],
+      File["$yus_grant_user_script"],
       Service['yus'],
     ],
     tries => 3,     # the yus service is not always ready the first time. Therefore we try it 3 times

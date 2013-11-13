@@ -6,8 +6,7 @@ RSA_NAME="<%= scope.lookupvar('username') %>"
 YUS_ROOT="<%= scope.lookupvar('yus_root') %>"
 ROOT_USER="<%= scope.lookupvar('root_name') %>"
 ROOT_PW="<%= scope.lookupvar('root_pw') %>"
-
-SHA_CMD= 'ruby18 /usr/local/lib64/ruby/gems/1.8/gems/yus-1.0.1/sha256.rb'
+SHA_CMD="<%= scope.lookupvar('sha_cmd') %>"
 
 rsaFile = "#{YUS_ROOT}/data/#{RSA_NAME}_rsa"
 crtFile = "#{rsaFile}.crt"

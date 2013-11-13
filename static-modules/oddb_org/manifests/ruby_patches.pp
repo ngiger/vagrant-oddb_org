@@ -35,51 +35,6 @@ class oddb_org::ruby_patches inherits oddb_org::oddb_git {
     path => '/usr/local/bin:/usr/bin:/bin',
   }
 
-  $columninfo_patched = "$inst_logs/columninfo_rb_patched.okay"
-  $columninfo_rb_patch = "/usr/local/share/columninfo.rb.patch"
-  file{"$columninfo_rb_patch":
-    source => "puppet:///modules/oddb_org/columninfo.rb.patch.20111123.txt",
-    owner => 'root',
-    group => 'root',
-    mode  => 0755,
-  }
-  exec{ "$columninfo_patched":
-    command => "$apply_ruby_patch 1.9 lib/dbi/columninfo.rb $columninfo_rb_patch && touch $columninfo_patched",
-    creates => "$columninfo_patched",
-    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
-    path => '/usr/local/bin:/usr/bin:/bin',
-  }
-
-  $statement_patched = "$inst_logs/statement_rb_patched.okay"
-  $statement_rb_patch = "/usr/local/share/statement.rb.patch"
-  file{"$statement_rb_patch":
-    source => "puppet:///modules/oddb_org/statement.rb.patch.20111125.txt",
-    owner => 'root',
-    group => 'root',
-    mode  => 0755,
-  }
-  exec{ "$statement_patched":
-    command => "$apply_ruby_patch 1.9 lib/dbi/handles/statement.rb $statement_rb_patch && touch $statement_patched",
-    creates => "$statement_patched",
-    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
-    path => '/usr/local/bin:/usr/bin:/bin',
-  }
-  
-  $row_patched = "$inst_logs/row_rb_patched.okay"
-  $row_rb_patch = "/usr/local/share/row.rb.patch"
-  file{"$row_rb_patch":
-    source => "puppet:///modules/oddb_org/row.rb.patch.20111125.txt",
-    owner => 'root',
-    group => 'root',
-    mode  => 0755,
-  }
-  exec{ "$row_patched":
-    command => "$apply_ruby_patch 1.9 lib/dbi/row.rb $row_rb_patch && touch $row_patched",
-    creates => "$row_patched",
-    require => [ Exec [ "$oddb_org::oddb_git::bundle_oddb_org", "$locate_installed_and_init" ], File["$apply_ruby_patch"], ],
-    path => '/usr/local/bin:/usr/bin:/bin',
-  }
-
   $notification_patched = "$inst_logs/notification_rb_patched.okay"
   $notification_rb_patch = "/usr/local/share/notification.rb.patch"
   file{"$notification_rb_patch":
