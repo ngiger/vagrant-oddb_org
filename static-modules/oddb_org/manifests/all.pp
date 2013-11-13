@@ -21,12 +21,15 @@ class oddb_org::all (
   
     include oddb_org::apache
     include oddb_org::currency
+    include oddb_org::chrony
+    include oddb_org::crontab
     include oddb_org::mail
     include oddb_org::migel
+    include oddb_org::pg
     include oddb_org::oddb_git
     include oddb_org::ruby_patches
-    include oddb_org::yus
     include oddb_org::services
+    include oddb_org::yus
     
     File["$oddb_org::mail::oddb_yml"] -> Exec["$oddb_org::yus::yus_grant_user"] # I just want to see this error soon
     Exec["$oddb_org::yus::yus_grant_user"] -> Service['apache2']
