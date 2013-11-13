@@ -16,6 +16,7 @@ class oddb_org::oddb_git(
       require => [User['apache'],],
   }  
   
+  ensure_packages(['mailx'])
   package{ 'yus':
     provider => gem,
   }
