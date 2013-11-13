@@ -7,8 +7,8 @@ class oddb_org::yus(
   $root_pw    = hiera('::oddb_org::root_pw', 'dummy_root_pw'),
   $yus_root   = "/etc/yus",
   $yus_data   = "/etc/yus/data",
-  $yus_grant_user = "$inst_logs/yus_grant_user.okay" # needed for oddb_org::all
-  $sha_cmd        = '/usr/local/bin/sha256.rb'
+  $yus_grant_user = "$inst_logs/yus_grant_user.okay", # needed for oddb_org::all
+  $sha_cmd        = "/usr/local/bin/sha256.rb"
 ) inherits oddb_org::pg {
 
   # run RUBYOPT=-rauto_gem rvm system do ruby /usr/local/bin/dbi_test.rb
@@ -46,14 +46,6 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
   }
   
   $yus_install_script = '/usr/local/bin/install_yus.sh'
-  file { "$yus_install_script":
-    source => "puppet:///modules/oddb_org/install_yus.sh",
-      owner => "$oddb_user",
-      group => "$oddb_group",
-      mode  => 0774,
-    require => [Package['apache'], User["$oddb_user"]],
-  }
-
   $service_location = "/usr/local/bin/yusd"
   $service_user     = "root"
   $install_yus_okay = "$inst_logs/install_yus.okay"
@@ -63,11 +55,7 @@ print Digest::SHA256.hexdigest(ARGV[0]),\"\\n\"
     require   => [File["$yus_root", "$yus_data", $yus_install_script], # "$service_location"],
     ],
     subscribe => File["$yus_install_script" ],
-    # creates => "$install_yus_okay",
-    onlyif => [
-      # run command if ruby19 specified or $service_location is not yet present
-      "/bin/grep ruby19 $service_location; /usr/bin/test $? -eq 0 -o ! -f $service_location",
-      ],
+    creates => "$install_yus_okay",
     user => 'root',
   }
 
@@ -97,33 +85,6 @@ exit 0",
     user => 'postgres',
   }
   
-  $yus_18_start     = "/usr/local/bin/yusd18"
-	file { "$yus_18_start":
-			ensure => present,
-			content => '#/bin/bash
-cd /usr/local/src/yus
-export BINDIR=/usr/local/ruby18/bin
-ruby18 $BINDIR/bundle exec ruby18 bin/yusd
-',
-      owner => "$oddb_user",
-      group => "$oddb_group",
-      require => User["$oddb_user"],
-      mode => '0775',
-	}
-
-
-  $yus_run     = "/var/lib/service/yus/run"
-  exec{ "$yus_run":
-    command => "$create_service_script root yus $yus_18_start",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$yus_run",
-  }
-    
   $yus_create_yml_script = '/usr/local/bin/yus_create_yml.rb'
   file {"$yus_create_yml_script":
       content => template('oddb_org/yus_create_yml.rb.erb'),
@@ -138,20 +99,10 @@ ruby18 $BINDIR/bundle exec ruby18 bin/yusd
     command => "$yus_create_yml_script",
     path => '/usr/local/bin:/usr/bin:/bin',
     require => [
-      Exec["$yus_db_created", "$yus_run"],
+        Exec["$yus_db_created"],
     ],
     creates => "$yus_create_yml",
     user => "$oddb_user",
-  }
-  
-  service{"yus":
-    provider => "daemontools",
-    ensure => running,
-    hasrestart => true,
-    path    => "$service_path",
-    require => [Exec["$yus_db_created", "$yus_create_yml", "$yus_run"], Service['svscan'], ],
-    subscribe  => [ Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml", "$yus_run"] 
-    ],
   }
   
   $yus_grant_user_script = '/usr/local/bin/yus_grant_user.rb'
@@ -178,4 +129,39 @@ ruby18 $BINDIR/bundle exec ruby18 bin/yusd
     user => 'root', # need to be root to (re-)start yus
   }
   
+  if ( hiera('::oddb_org::use_yus_19', false)) {
+    file { "$yus_install_script":
+      source => "puppet:///modules/oddb_org/install_yus19.sh",
+        owner => "$oddb_user",
+        group => "$oddb_group",
+        mode  => 0774,
+      require => [Package['apache'], User["$oddb_user"]],
+    }
+
+    oddb_org::add_service{'yus':
+      working_dir => '/usr/local/src/yus19',
+      user        => "$oddb_user",
+      exec        => 'bundle exec ruby',
+      arguments   => 'bin/yusd',
+      require     => [ User["$oddb_user"],Exec["$yus_db_created", "$yus_create_yml"], Service['svscan'] ],
+      subscribe   => Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml"],
+    }
+  }
+  else {
+    file { "$yus_install_script":
+      source => "puppet:///modules/oddb_org/install_yus18.sh",
+        owner => "$oddb_user",
+        group => "$oddb_group",
+        mode  => 0774,
+      require => [Package['apache'], User["$oddb_user"]],
+    }
+    oddb_org::add_service{'yus':
+      working_dir => '/usr/local/src/yus18',
+      user        => "$oddb_user",
+      exec        => 'ruby18 /usr/local/ruby18/bin/bundle exec ruby18 ',
+      arguments   => 'bin/yusd',
+      require     => [ User["$oddb_user"],Exec["$yus_db_created", "$yus_create_yml"], Service['svscan'] ],
+      subscribe   => Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml"],
+    }
+  }  
 }

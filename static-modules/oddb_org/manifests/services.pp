@@ -3,7 +3,7 @@
 
 class oddb_org::services(
 ) inherits oddb_org {
-
+  require oddb_org::yus
   # not active anymore 
   # * analysisparse
   # * readonly
@@ -31,198 +31,75 @@ class oddb_org::services(
     creates => "/usr/lib64/ruby/site_ruby/1.9.1/x86_64-linux/rwv2.so",
   }
 
-  $crawler_name     = "oddb_crawler"
-  $crawler_run      = "/var/lib/service/$crawler_name/run"
-  exec{ "$crawler_run":
-    command => "$create_service_script $oddb_user $crawler_name '$ODDB_HOME/bin/oddbd crawler'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$crawler_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"$crawler_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$crawler_run"],
-    require    => [Service['yus'], User['apache'], Exec["$crawler_run"], ],
+  oddb_org::add_service{"oddb_crawler":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'bin/oddbd crawler',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
 
-  $export_name     = "ch.oddb-export"
-  $export_run      = "/var/lib/service/$export_name/run"
-  exec{ "$export_run":
-    command => "$create_service_script $oddb_user $export_name '$ODDB_HOME/ext/export/bin/exportd'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$export_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"$export_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$export_run"],
-    require    => [Service['yus'], User['apache'], Exec["$export_run"], ],
+  oddb_org::add_service{"ch.oddb-export":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/export/bin/exportd',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
 
-  $fiparse_name     = "ch.oddb-fiparse"
-  $fiparse_run      = "/var/lib/service/$fiparse_name/run"
-  package{'app-text/wv2': }
-  
-  exec{ "$fiparse_run":
-    command => "$create_service_script $oddb_user $fiparse_name '$ODDB_HOME/ext/fiparse/bin/fiparsed'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      Exec["install_rwv2"],
-      User["$oddb_user"],
-      Package['daemontools', 'app-text/wv2', 'rwv2', 'ydocx', 'rpdf2txt'],
-    ],
-    creates => "$fiparse_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  file {"$ODDB_HOME/ext/fiparse/bin/fiparsed":
-    ensure => present,
-    mode   => 0755,
-    owner  => "$oddb_user",
-    group  => "$oddb_group",    
-  }
-  
-  service{"$fiparse_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$fiparse_run", "install_rwv2"],
-    require    => [Service['yus'], User['apache'], Exec["$fiparse_run"], ],
+  oddb_org::add_service{"ch.oddb-fiparse":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/fiparse/bin/fiparsed',
+    require     => [Service['yus'], User['apache'], Package['daemontools', 'ydocx', 'rpdf2txt'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
 
-  $google_crawler_name     = "oddb_google_crawler"
-  $google_crawler_run      = "/var/lib/service/$google_crawler_name/run"
-  exec{ "$google_crawler_run":
-    command => "$create_service_script $oddb_user $google_crawler_name '$ODDB_HOME/bin/oddbd google_crawler'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$google_crawler_run",
-    user => 'root', # need to be root to (re-)start yus
+  oddb_org::add_service{"oddb_google_crawler":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'bin/oddbd google_crawler',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
   
-  service{"$google_crawler_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$google_crawler_run"],
-    require    => [Service['yus'], User['apache'], Exec["$google_crawler_run"], ],
-  }
-  
-  $meddata_name     = "ch.oddb-meddata"
-  $meddata_run      = "/var/lib/service/$meddata_name/run"
-  exec{ "$meddata_run":
-    command => "$create_service_script $oddb_user $meddata_name '$ODDB_HOME/ext/meddata/bin/meddatad'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$meddata_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"$meddata_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$meddata_run"],
-    require    => [Service['yus'], User['apache'], Exec["$meddata_run"], ],
+  oddb_org::add_service{"ch.oddb-meddata":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/meddata/bin/meddatad',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
 
-  $swissindex_nonpharma_name     = "ch.oddb-swissindex_nonpharma"
-  $swissindex_nonpharma_run      = "/var/lib/service/$swissindex_nonpharma_name/run"
-  exec{ "$swissindex_nonpharma_run":
-    command => "$create_service_script $oddb_user $swissindex_nonpharma_name '$ODDB_HOME/ext/swissindex/bin/swissindex_nonpharmad'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$swissindex_nonpharma_run",
-    user => 'root', # need to be root to (re-)start yus
+  oddb_org::add_service{"ch.oddb-swissindex_nonpharma":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/swissindex/bin/swissindex_nonpharmad',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
+  }
+    
+  oddb_org::add_service{"ch.oddb-swissindex_pharma":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/swissindex/bin/swissindex_pharmad',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
   
-  service{"$swissindex_nonpharma_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$swissindex_nonpharma_run"],
-    require    => [Service['yus'], User['apache'], Exec["$swissindex_nonpharma_run"], ],
+  oddb_org::add_service{"ch.oddb-swissreg":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'ext/swissreg/bin/swissregd',
+    require     => [Service['yus'], User['apache'], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
-
-  $swissindex_pharma_name     = "ch.oddb-swissindex_pharma"
-  $swissindex_pharma_run      = "/var/lib/service/$swissindex_pharma_name/run"
-  exec{ "$swissindex_pharma_run":
-    command => "$create_service_script $oddb_user $swissindex_pharma_name '$ODDB_HOME/ext/swissindex/bin/swissindex_pharmad'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$swissindex_pharma_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"$swissindex_pharma_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$swissindex_pharma_run"],
-    require    => [Service['yus'], User['apache'], Exec["$swissindex_pharma_run"], ],
-  }
-  
-  $swissreg_name     = "ch.oddb-swissreg"
-  $swissreg_run      = "/var/lib/service/$swissreg_name/run"
-  exec{ "$swissreg_run":
-    command => "$create_service_script $oddb_user $swissreg_name '$ODDB_HOME/ext/swissreg/bin/swissregd'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$swissreg_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"$swissreg_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => Exec["$swissreg_run"],
-    require    => [Service['yus'], User['apache'], Exec["$swissreg_run"], ],
-  }
-
 }

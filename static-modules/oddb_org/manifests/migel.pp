@@ -8,6 +8,7 @@ class oddb_org::migel(
   $mail_to        = hiera('::oddb_org::mail_to',         'put mail_to  into hiera-data/private/config.yaml'),
 ) inherits oddb_org {
   include oddb_org::pg
+  include oddb_org::yus
 
   # we need to install migel
   $migel_git = '/var/www/migel'
@@ -43,21 +44,6 @@ class oddb_org::migel(
     timeout => 15*160, # max wait time in seconds, took just above default 5 minutes on my machine
   }
   
-  $migel_name     = "migeld"
-  $migel_run      = "/var/lib/service/$migel_name/run"
-  exec{ "$migel_run":
-    command => "$create_service_script $oddb_user $migel_name '$migel_git/bin/migeld'",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      Vcsrepo["$migel_git"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$migel_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
   $migel_yml = '/etc/migel/migel.yml'
   file{'/etc/migel':
     ensure => directory,
@@ -69,15 +55,14 @@ class oddb_org::migel(
     group => 'root',
     mode => '0644',    
     require => [ Vcsrepo["$migel_git"], File['/etc/migel'] ]
-}
-  
-  service{"$migel_name":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    subscribe  => [ Exec["$migel_run"] ],
-    require    => [ User['apache'], Exec["$migel_run"], ],
   }
-
+  
+  oddb_org::add_service{"migeld":
+    working_dir => "$migel_git",
+    user        => "$oddb_user",
+    exec        => 'ruby',
+    arguments   => 'bin/migeld',
+    require     => [Service['yus'], Vcsrepo["$migel_git"], File["$migel_yml"], User['apache'], Exec["$pg_migel_db_load_script"], ],
+    subscribe   => Service['yus'], # , 'oddb'
+  }
 }

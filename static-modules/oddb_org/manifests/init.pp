@@ -56,7 +56,25 @@ class oddb_org(
     package{'librarian-puppet':
       provider => gem,
     }
-    
+    define oddb_org::add_service($svc_path = $oddb_org::service_path, $working_dir, $user, $exec, $arguments) {
+      file {"$svc_path/$title":
+        ensure => directory
+      }
+      file{"$svc_path/$title/run":
+        ensure  => present,
+        mode    => 0754,
+        content => template('oddb_org/service_run.erb'),
+        require => File["$svc_path/$title"],
+      }
+      service{"$title":
+        ensure => running,
+        provider => "daemontools",
+        path    => "$service_path",
+        hasrestart => true,
+        subscribe  => File["$svc_path/$title/run"],
+        require    => File["$svc_path/$title/run"],
+      }
+    }    
     $rc_svscan          = '/etc/init.d/svscan'
     exec{ "$rc_svscan":
       command => "/sbin/rc-update add svscan && $rc_svscan restart",

@@ -94,25 +94,12 @@ class oddb_org::oddb_git(
     require => [Package['apache'], ],
   }
   
-  $service_location = "$ODDB_HOME/bin/oddbd"
-  $oddb_run     = "/var/lib/service/oddb/run"
-  exec{ "$oddb_run":
-    command => "$create_service_script $oddb_user oddb $ODDB_HOME/bin/oddbd",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
-    ],
-    creates => "$oddb_run",
-    user => 'root', # need to be root to (re-)start yus
-  }
-  
-  service{"oddb":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    require    => [User['apache'], Exec["$oddb_setup_run", "$oddb_run"], ],
+  oddb_org::add_service{"oddb":
+    working_dir => "$ODDB_HOME",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'bin/oddbd',
+    require     => [Service['yus'], User['apache'], Exec["$oddb_setup_run"], ],
+    subscribe   => Service['yus'], # , 'oddb'
   }
 }
