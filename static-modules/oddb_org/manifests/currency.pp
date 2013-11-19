@@ -5,49 +5,34 @@ class oddb_org::currency(
   $username     = hiera('::oddb_org::username', 'dummy_user'),
   $root_name    = hiera('::oddb_org::root_name', 'dummy_root'),
   $root_pass    = hiera('::oddb_org::root_hash', 'dummy_root_hash'),
+  $bundle_currency =  "$inst_logs/bundle_currency_install.okay"
 ) inherits oddb_org {
 
-  $currency_run     = "/var/lib/service/currency/run"
-  exec{ "$currency_run":
-    command => "$create_service_script $oddb_user currency /usr/local/bin/currencyd",
+  $currency_repo = '/opt/src/ycurrency'
+  exec { "$bundle_currency":
+    command => "eselect ruby set ruby19 && bundle install && touch $bundle_currency",
+    creates => "$bundle_currency",
+    cwd => "$currency_repo",
     path => '/usr/local/bin:/usr/bin:/bin',
-    require => [
-      File["$create_service_script"],
-      User["$oddb_user"],
-      Package['daemontools'],
+    require => [  Package['bundler'] ,
+        Vcsrepo[$currency_repo],    
     ],
-    creates => "$currency_run",
-    user => 'root', # need to be root to (re-)start yus
   }
 
-  $currency_repo = '/opt/src/ycurrency'
   vcsrepo {  "$currency_repo":
       ensure => present,
       provider => git,
       owner => 'apache',
       group => 'apache',
-      source => 'git://scm.ywesee.com/currency',
-      # cloning via git did not work!
-      # source => "git://scm.ywesee.com/oddb.org/.git ",
+      source => 'https://github.com/zdavatz/currency.git',
       require => [User['apache'],],
   }  
    
-  $service_location = "/usr/local/bin/currencyd"
-  $service_depend   = ""
-  $service_user     = "$oddb_user"
-  
-  exec{ "$service_location":
-    command => "gem install ycurrency",
-    path => '/usr/local/bin:/usr/bin:/bin',
-    creates => $service_location,
+  oddb_org::add_service{"currency":
+    working_dir => "$currency_repo",
+    user        => "$oddb_user",
+    exec        => 'bundle exec ruby',
+    arguments   => 'bin/currencyd',
+    require     => [Vcsrepo["$currency_repo"], User['apache'], Exec["$bundle_currency"], ],
   }
-  
-  service{"currency":
-    ensure => running,
-    provider => "daemontools",
-    path    => "$service_path",
-    hasrestart => true,
-    require    => [User['apache'], Exec["$service_location", "$currency_run"], ],
-  }
-
 }

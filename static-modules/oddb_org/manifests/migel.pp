@@ -15,7 +15,7 @@ class oddb_org::migel(
   vcsrepo {"$migel_git":
       ensure => present,
       provider => git,
-      source => 'git://scm.ywesee.com/migel',
+      source => 'https://github.com/zdavatz/migel.git',
       require => [User['apache'],],
   }  
   
@@ -43,6 +43,17 @@ class oddb_org::migel(
     path => "$path",
     timeout => 15*160, # max wait time in seconds, took just above default 5 minutes on my machine
   }
+
+  $migel_bundle_installed = "/opt/migel_bundle_installed.okay"
+  exec{ "$migel_bundle_installed":
+    cwd     => "$migel_git",
+    command => "bundle install && touch $migel_bundle_installed",
+    creates => "$migel_bundle_installed",
+    require => [ 
+      Vcsrepo["$migel_git"],
+    ],
+    path => "$path",
+  }
   
   $migel_yml = '/etc/migel/migel.yml'
   file{'/etc/migel':
@@ -60,7 +71,7 @@ class oddb_org::migel(
   oddb_org::add_service{"migeld":
     working_dir => "$migel_git",
     user        => "$oddb_user",
-    exec        => 'ruby',
+    exec        => 'bundle exec ruby',
     arguments   => 'bin/migeld',
     require     => [Service['yus'], Vcsrepo["$migel_git"], File["$migel_yml"], User['apache'], Exec["$pg_migel_db_load_script"], ],
     subscribe   => Service['yus'], # , 'oddb'

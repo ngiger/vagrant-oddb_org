@@ -12,7 +12,7 @@ class oddb_org::oddb_git(
       provider => git,
       owner => "$oddb_user",
       group => "apache",
-      source => "git://scm.ywesee.com/oddb.org/.git",
+      source => "https://github.com/zdavatz/oddb.org.git",
       require => [User['apache'],],
   }  
   
@@ -100,6 +100,7 @@ class oddb_org::oddb_git(
     user        => "$oddb_user",
     exec        => 'bundle exec ruby',
     arguments   => 'bin/oddbd',
+    memory_ulimit => '10240000',
     require     => [Service['yus'], User['apache'], Exec["$oddb_setup_run"], ],
     subscribe   => Service['yus'], # , 'oddb'
   }

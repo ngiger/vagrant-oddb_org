@@ -48,7 +48,6 @@ class oddb_org(
   $oddb_user          = 'apache',
   $oddb_group         = 'oddb',
   $inst_logs          = '/opt/logs',
-  $create_service_script = '/usr/local/bin/create_service.rb',
   $service_path          = '/var/lib/service'
 ) {
 
@@ -56,7 +55,7 @@ class oddb_org(
     package{'librarian-puppet':
       provider => gem,
     }
-    define oddb_org::add_service($svc_path = $oddb_org::service_path, $working_dir, $user, $exec, $arguments) {
+    define oddb_org::add_service($svc_path = $oddb_org::service_path, $memory_ulimit = "1536000", $working_dir, $user, $exec, $arguments) {
       file {"$svc_path/$title":
         ensure => directory
       }
@@ -94,13 +93,6 @@ class oddb_org(
     file {'/var/lib/service':
       ensure => directory,
       mode  => 0644,
-    }
-
-    file { "$create_service_script":
-      source => "puppet:///modules/oddb_org/create_service.rb",
-      mode  => 0774,
-      require => [Package['apache'], File['/var/lib/service'],
-      ],
     }
 
     # To be able to read the /run/postgresql directory, the apache user must belong
