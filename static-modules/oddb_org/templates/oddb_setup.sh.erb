@@ -1,10 +1,11 @@
 #!/bin/bash 
 # Modified by Niklaus Giger, 2013-04-04
 export ODDB_HOME=<%= foostatus = scope.lookupvar('ODDB_HOME') %>
+export DOJO_VERS=1.7.2
 cd $ODDB_HOME/doc/resources
-wget http://download.dojotoolkit.org/release-1.3.0/dojo-release-1.3.0.tar.gz
+wget http://download.dojotoolkit.org/release-${DOJO_VERS}/dojo-release-${DOJO_VERS}.tar.gz
 if [ $? -ne 0 ] ; then exit 1; fi
-tar -zxf dojo-release-1.3.0.tar.gz && mv dojo-release-1.3.0 dojo
+tar -zxf dojo-release-${DOJO_VERS}.tar.gz && mv dojo-release-${DOJO_VERS} dojo
 if [ $? -ne 0 ] ; then exit 1; fi
 cd $ODDB_HOME
 pwd
