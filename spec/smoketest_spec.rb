@@ -27,7 +27,7 @@ describe "ch.oddb.org" do
   before :all do
     @idx = 0
     @homeUrl ||= ENV['ODDB_URL']
-    @homeUrl ||= "oddb.niklaus.org"
+    @homeUrl ||= "oddb-ci2.dyndns.org"
     @browser = Watir::Browser.new
   end
   
@@ -122,7 +122,7 @@ x=%(
 zum schnell von Hand testen
 require 'watir'
 @idx = 0
-@homeUrl ||= "oddb.niklaus.org"
+@homeUrl ||= "oddb-ci2.dyndns.org"
 @browser = Watir::Browser.new
 @browser.goto @homeUrl
 
