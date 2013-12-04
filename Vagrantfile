@@ -91,7 +91,8 @@ Vagrant.configure("2") do |config|
       # config.vm.synced_folder "src/", "/srv/website"
       # config.vm.synced_folder "/etc/puppet/hieradata", File.join(File.dirname(__FILE__), 'hieradata') , disabled: true
       oddbFuntoo.vm.synced_folder File.join(File.dirname(__FILE__), 'hieradata'), "/etc/puppet/hieradata"
-    end    
+    end
+    config.vm.share_folder "oddb.org", "/mnt/oddb.org", "/opt/src/oddb.org"
   end
   
 end
