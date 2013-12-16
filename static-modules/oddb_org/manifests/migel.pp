@@ -47,7 +47,7 @@ class oddb_org::migel(
   $migel_bundle_installed = "/opt/migel_bundle_installed.okay"
   exec{ "$migel_bundle_installed":
     cwd     => "$migel_git",
-    command => "bundle install && touch $migel_bundle_installed",
+    command => "git pull && bundle install --without debugger && touch $migel_bundle_installed",
     creates => "$migel_bundle_installed",
     require => [ 
       Vcsrepo["$migel_git"],

@@ -10,7 +10,7 @@ class oddb_org::currency(
 
   $currency_repo = '/opt/src/ycurrency'
   exec { "$bundle_currency":
-    command => "eselect ruby set ruby19 && bundle install && touch $bundle_currency",
+    command => "eselect ruby set ruby19 && git pull && bundle install && touch $bundle_currency",
     creates => "$bundle_currency",
     cwd => "$currency_repo",
     path => '/usr/local/bin:/usr/bin:/bin',

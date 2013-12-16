@@ -47,7 +47,7 @@ class oddb_org::oddb_git(
   package{'imagemagick':}  # needed for gem rmagick
   
   exec { "$bundle_oddb_org":
-    command => "eselect ruby set ruby19 && bundle install && touch $bundle_oddb_org",
+    command => "eselect ruby set ruby19 && git pull && bundle install && touch $bundle_oddb_org",
     creates => "$bundle_oddb_org",
     cwd => "$ODDB_HOME",
     path => "$path",
