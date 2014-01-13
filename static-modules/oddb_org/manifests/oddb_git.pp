@@ -44,6 +44,7 @@ class oddb_org::oddb_git(
     path => "$path",
   }
    
+  package{'ghostscript-gpl':}  # needed for displaying tageskosten
   package{'imagemagick':}  # needed for gem rmagick
   
   exec { "$bundle_oddb_org":
