@@ -16,3 +16,4 @@ mod "puppetlabs/stdlib"
 mod 'domcleal/augeasproviders'
 mod "puppetlabs/vcsrepo"
 mod 'oddb_org', :path => './static-modules/oddb_org'
+mod 'gentoo/portage'

@@ -33,8 +33,6 @@ class oddb_org::oddb_git(
   }
   package{ 'bundler':  provider => gem, }
    
-  package{ 'tmail': provider => portage }
-   
   package{ 'eselect-ruby': }
   $ruby_installed = "$inst_logs/two_rubies_installed.okay"
   # we need libyaml for YAML syck to work correctly
@@ -43,16 +41,23 @@ class oddb_org::oddb_git(
     creates => "$ruby_installed",
     path => "$path",
   }
-   
   package{'ghostscript-gpl':}  # needed for displaying tageskosten
-  package{'imagemagick':}  # needed for gem rmagick
+  # As seen in http://dev.ywesee.com/Niklaus/20140113-hpc-error we should emerge imagemagick with
+  portage::package { 'media-gfx/imagemagick':
+    use     => ['png', 'jpeg', 'truetype'],
+    ensure  => present,
+  }
+  portage::package { 'sys-kernel/debian-sources':
+    use     => ['binary'],
+    ensure  => present,
+  }
   
   exec { "$bundle_oddb_org":
     command => "eselect ruby set ruby19 && git pull && bundle install && touch $bundle_oddb_org",
     creates => "$bundle_oddb_org",
     cwd => "$ODDB_HOME",
     path => "$path",
-    require => [  Package['bundler', 'imagemagick', 'tmail'],
+    require => [Portage::Package['media-gfx/imagemagick'], [  Package['bundler']],
     Vcsrepo[$ODDB_HOME],
     
     ],
