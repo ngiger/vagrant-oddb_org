@@ -101,10 +101,10 @@ class oddb_org::oddb_git(
     require => [Package['apache'], ],
   }
   
-  oddb_org::add_service{"oddb":
+  oddb_org::add_service{"ch.oddb":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => '/usr/local/bin/ruby',
     arguments   => 'bin/oddbd',
     memory_ulimit => '10240000',
     require     => [Service['yus'], User['apache'], Exec["$oddb_setup_run"], ],

@@ -10,7 +10,7 @@ class oddb_org::currency(
 
   $currency_repo = '/opt/src/ycurrency'
   exec { "$bundle_currency":
-    command => "eselect ruby set ruby19 && git pull && bundle install && touch $bundle_currency",
+    command => "eselect ruby set ruby19 && git pull && touch $bundle_currency",
     creates => "$bundle_currency",
     cwd => "$currency_repo",
     path => '/usr/local/bin:/usr/bin:/bin',
@@ -31,7 +31,7 @@ class oddb_org::currency(
   oddb_org::add_service{"currency":
     working_dir => "$currency_repo",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => '/usr/local/bin/ruby',
     arguments   => 'bin/currencyd',
     require     => [Vcsrepo["$currency_repo"], User['apache'], Exec["$bundle_currency"], ],
   }

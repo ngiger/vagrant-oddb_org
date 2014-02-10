@@ -14,8 +14,8 @@ class oddb_org::crontab(
     $job_path     = '/etc/cron.daily', 
     $working_dir  = "$ODDB_HOME", 
     $user         = "$oddb_user",
-    $exec         = 'bundle install &>/dev/null && bundle exec ruby', 
-    $arguments    = "jobs/$title") {
+    $exec         = "$ODDB_HOME/bin/$title &>/dev/null",
+  ) {
 
     file{"$job_path/$title":
       ensure  => present,
@@ -25,11 +25,31 @@ class oddb_org::crontab(
   }
   
   # daily jobs
-  oddb_org::crontab::add_crontab{'export_daily': }
-  oddb_org::crontab::add_crontab{'export_fachinfo_yaml': }
-  oddb_org::crontab::add_crontab{'export_patinfo_yaml': }
-  oddb_org::crontab::add_crontab{'import_daily': }
-  oddb_org::crontab::add_crontab{'mail_index_therapeuticus_csv': }
+  cron { logrotate:  command => "/usr/sbin/logrotate  /etc/logrotate.conf",  user    => root,
+    hour    => 2,  minute  => 0
+  }
+  
+  $log_dir = "/var/log/oddb.org"
+  file { $log_dir:
+    ensure => directory,
+    owner => $oddb_user,
+  }
+	notify { "export_daily with $ODDB_HOME/bin/$title user $oddb_user": }
+  cron{'export_daily2':
+    command => "$ODDB_HOME/bin/$title xx >$log_dir/$title.log",
+    user => $oddb_user, minute => 1, hour => 0}
+  cron{'export_fachinfo_yaml':
+    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    user => $oddb_user, minute => 1, hour => 2, monthday => 28}
+  cron{'export_patinfo_yaml':
+    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    user => $oddb_user, minute => 1, hour => 3, monthday => 27}
+  cron{'import_daily':
+    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    user => $oddb_user, minute => 1, hour => 4}
+  cron{'mail_index_therapeuticus_csv':
+    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    user => $oddb_user, minute => 1, hour => 5, monthday => 25, month => 8}
 
   # seldom running jobs via cron
   # run ch.oddb migel-products updates 1st of January and 1st of June (run the BAG update via NovaCantica manually)

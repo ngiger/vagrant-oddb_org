@@ -47,7 +47,7 @@ class oddb_org::migel(
   $migel_bundle_installed = "/opt/migel_bundle_installed.okay"
   exec{ "$migel_bundle_installed":
     cwd     => "$migel_git",
-    command => "git pull && bundle install --without debugger && touch $migel_bundle_installed",
+    command => "git pull && touch $migel_bundle_installed",
     creates => "$migel_bundle_installed",
     require => [ 
       Vcsrepo["$migel_git"],
@@ -71,7 +71,7 @@ class oddb_org::migel(
   oddb_org::add_service{"migeld":
     working_dir => "$migel_git",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => '/usr/local/bin/ruby',
     arguments   => 'bin/migeld',
     require     => [Service['yus'], Vcsrepo["$migel_git"], File["$migel_yml"], User['apache'], Exec["$pg_migel_db_load_script"], ],
     subscribe   => Service['yus'], # , 'oddb'

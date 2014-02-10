@@ -1,6 +1,7 @@
 #!/bin/sh
+# managed by puppet from #{__FILE__}
 exec 2>&1
 ulimit -v <%= scope.lookupvar('memory_ulimit') %>
 cd <%= scope.lookupvar('working_dir') %>
-sudo -u <%= scope.lookupvar('user') %> bundle install --deployment --without debugger
+# sudo -u <%= scope.lookupvar('user') %> bundle install --deployment --without debugger
 exec sudo -u <%= scope.lookupvar('user') %> <%= scope.lookupvar('exec') %> <%= scope.lookupvar('arguments') %>

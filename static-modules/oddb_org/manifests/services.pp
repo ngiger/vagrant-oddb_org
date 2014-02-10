@@ -22,7 +22,7 @@ class oddb_org::services(
       source => 'git://scm.ywesee.com/rwv2',
       require => [User['apache'],],
   }  
-  
+  $exec_cmd = '/usr/local/bin/ruby'
   exec{ "install_rwv2":
     command => "ruby19 install.rb config && ruby19 install.rb setup && ruby19 install.rb install",
     cwd => "$rwv2_git",
@@ -31,10 +31,10 @@ class oddb_org::services(
     creates => "/usr/lib64/ruby/site_ruby/1.9.1/x86_64-linux/rwv2.so",
   }
 
-  oddb_org::add_service{"oddb_crawler":
+  oddb_org::add_service{"ch.oddb-crawler":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'bin/oddbd crawler',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -43,7 +43,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-export":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/export/bin/exportd',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -52,7 +52,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-fiparse":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/fiparse/bin/fiparsed',
     require     => [Service['yus'], User['apache'], Package['daemontools', 'ydocx', 'rpdf2txt'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -61,7 +61,7 @@ class oddb_org::services(
   oddb_org::add_service{"oddb_google_crawler":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'bin/oddbd google_crawler',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -70,7 +70,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-meddata":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/meddata/bin/meddatad',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -79,7 +79,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-swissindex_nonpharma":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/swissindex/bin/swissindex_nonpharmad',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -88,7 +88,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-swissindex_pharma":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/swissindex/bin/swissindex_pharmad',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'
@@ -97,7 +97,7 @@ class oddb_org::services(
   oddb_org::add_service{"ch.oddb-swissreg":
     working_dir => "$ODDB_HOME",
     user        => "$oddb_user",
-    exec        => 'bundle exec ruby',
+    exec        => $exec_cmd,
     arguments   => 'ext/swissreg/bin/swissregd',
     require     => [Service['yus'], User['apache'], ],
     subscribe   => Service['yus'], # , 'oddb'

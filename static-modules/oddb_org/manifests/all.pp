@@ -37,5 +37,5 @@ class oddb_org::all (
     Service['svscan'] -> Service['currency']
     Service['currency'] -> Service['yus']
     Service['yus'] -> Service['apache2']
-    Service['apache2'] -> Service['oddb']
+    Service['apache2'] -> Service['ch.oddb']
 }
