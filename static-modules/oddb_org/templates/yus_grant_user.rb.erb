@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-
 require 'fileutils'
 
 RSA_NAME="<%= scope.lookupvar('username') %>"
@@ -84,7 +83,7 @@ exit 1 unless system(cmd)
 
 # Don't know why I have to reinstall yus (wiht gem18) here againg. But it works
 system('gem18 install yus --no-ri --no-rdoc')
-system('svc -u /service/yus')
+system("svc -u <%= scope.lookupvar('service_path') %>/yus')
 sleep(2)  # give yis some time to start up
 system('eselect ruby set ruby18')
 grantAllToRootUser

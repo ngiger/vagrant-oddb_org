@@ -48,7 +48,7 @@ class oddb_org(
   $oddb_user          = 'apache',
   $oddb_group         = 'oddb',
   $inst_logs          = '/opt/logs',
-  $service_path          = '/var/lib/service'
+  $service_path       = '/service' # on gentoo default is /service on debian /var/lib/service
 ) {
 
     package{'daemontools': }
@@ -90,7 +90,7 @@ class oddb_org(
       status => running,
     }
 
-    file {'/var/lib/service':
+    file {"$service_path":
       ensure => directory,
       mode  => 0644,
     }
