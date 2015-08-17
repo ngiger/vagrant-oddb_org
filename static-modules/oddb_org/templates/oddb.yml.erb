@@ -6,7 +6,7 @@ smtp_pass:  <%= scope.lookupvar('email_password') %>
 smtp_port: 587
 url_bag_sl_zip: http://bag.e-mediat.net/SL2007.Web.External/File.axd?file=XMLPublications.zip
 mail_from: <%= scope.lookupvar('email_user') %>
-mail_to: <% receivers = scope.function_hiera(['::oddb_org::mail_to']) %>
+mail_to: <% receivers = @mail_to %>
 <% for receiver in receivers do %><%= "  - #{receiver}\n" %><% end %>
 text_info_newssource:  http://www.documed.ch/de/xml/fastonline.rss.php
 text_info_newssource2: http://compendium.ch/update/de

@@ -5,5 +5,5 @@ if [ -d /vagrant ] ; then PUPPET_DIR=/vagrant ; else PUPPET_DIR=/etc/puppet ; fi
 if [ -f Puppetfile ] ; then PUPPET_DIR=`pwd` ; fi
 echo PUPPET_DIR is $PUPPET_DIR
 cd $PUPPET_DIR
-bash ./runlibrarian
-sudo -i puppet apply --modulepath $PUPPET_DIR/modules --hiera_config $PUPPET_DIR/hieradata/hiera.yaml $*
+bash bundle exec ./runlibrarian
+sudo -i bundle exec puppet apply --modulepath $PUPPET_DIR/modules --hiera_config $PUPPET_DIR/hieradata/hiera.yaml $*

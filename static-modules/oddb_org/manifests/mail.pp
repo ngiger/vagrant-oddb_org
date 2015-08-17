@@ -9,7 +9,7 @@ class oddb_org::mail(
   $flickr_shared_secret = hiera('::oddb_org::flickr_shared_secret', 'put your flickr_shared_secret into hieradata/private/config.yaml'),
   $flickr_api_key       = hiera('::oddb_org::flickr_api_key',       'put your flickr_api_key into hieradata/private/config.yaml'),
   $hostname             = hiera('::oddb_org::hostname',      'put your hostname into hieradata/private/config.yaml'),
-  $oddb_yml = "$ODDB_HOME/etc/oddb.yml", # needed of oddb_org::all
+  $oddb_yml = "$oddb_home/etc/oddb.yml", # needed of oddb_org::all
  
 ) inherits oddb_org::oddb_git {
   $mail_package = 'ssmtp'
@@ -54,7 +54,7 @@ FromLineOverride=Yes
     owner => 'root',
     group => 'root',
     mode => '0644',    
-    require => [ Vcsrepo["$ODDB_HOME"], Package[$mail_package], ]
+    require => [ Vcsrepo["$oddb_home"], Package[$mail_package], ]
 }
   
 

@@ -12,9 +12,9 @@ class oddb_org::crontab(
   
   define oddb_org::crontab::add_crontab(
     $job_path     = '/etc/cron.daily', 
-    $working_dir  = "$ODDB_HOME", 
+    $working_dir  = "$oddb_home",
     $user         = "$oddb_user",
-    $exec         = "$ODDB_HOME/bin/$title &>/dev/null",
+    $exec         = "$oddb_home/bin/$title &>/dev/null",
   ) {
 
     file{"$job_path/$title":
@@ -34,21 +34,21 @@ class oddb_org::crontab(
     ensure => directory,
     owner => $oddb_user,
   }
-	notify { "export_daily with $ODDB_HOME/bin/$title user $oddb_user": }
+	notify { "export_daily with $oddb_home/bin/$title user $oddb_user": }
   cron{'export_daily2':
-    command => "$ODDB_HOME/bin/$title xx >$log_dir/$title.log",
+    command => "$oddb_home/bin/$title >$log_dir/$title.log",
     user => $oddb_user, minute => 1, hour => 0}
   cron{'export_fachinfo_yaml':
-    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    command => "$oddb_home/bin/$title >$log_dir/$title.log 2>&1",
     user => $oddb_user, minute => 1, hour => 2, monthday => 28}
   cron{'export_patinfo_yaml':
-    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    command => "$oddb_home/bin/$title >$log_dir/$title.log 2>&1",
     user => $oddb_user, minute => 1, hour => 3, monthday => 27}
   cron{'import_daily':
-    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    command => "$oddb_home/bin/$title >$log_dir/$title.log 2>&1",
     user => $oddb_user, minute => 1, hour => 4}
   cron{'mail_index_therapeuticus_csv':
-    command => "$ODDB_HOME/bin/$title >$log_dir/$title.log 2>&1",
+    command => "$oddb_home/bin/$title >$log_dir/$title.log 2>&1",
     user => $oddb_user, minute => 1, hour => 5, monthday => 25, month => 8}
 
   # seldom running jobs via cron
@@ -83,21 +83,7 @@ class oddb_org::crontab(
     ensure => '/usr/bin/ruby',    
   }
   
-  file {'/etc/logrotate.d/oddb':
-    mode => 0644,
-    content => "
-/var/log/oddb/*
-{
-        rotate 7
-        olddir /var/log/oddb/old
-        daily
-        missingok
-        notifempty
-        delaycompress
-        compress
-}
-",
-  }
+  file {'/etc/logrotate.d/oddb': ensure => absent, }
   
   file {'/etc/logrotate.d/rsyslog':
     mode => 0644,

@@ -158,7 +158,7 @@ exit 0",
     oddb_org::add_service{'yus':
       working_dir => '/usr/local/src/yus18',
       user        => "$oddb_user",
-      exec        => 'ruby18 /usr/local/ruby18/bin//usr/local/bin/ruby18 ',
+      exec        => 'RUBYOPT="-rauto_gem" /usr/bin/ruby18',
       arguments   => 'bin/yusd',
       require     => [ User["$oddb_user"],Exec["$yus_db_created", "$yus_create_yml"], Service['svscan'] ],
       subscribe   => Exec["$yus_db_created", "$yus_install_script", "$yus_create_yml"],

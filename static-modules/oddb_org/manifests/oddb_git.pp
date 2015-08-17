@@ -7,7 +7,7 @@ class oddb_org::oddb_git(
   $bundle_oddb_org =  "$inst_logs/oddb_bundle_install.okay"
 ) inherits oddb_org::pg {
   
-  vcsrepo {  "$ODDB_HOME":
+  vcsrepo {  "$oddb_home":
       ensure => present,
       provider => git,
       owner => "$oddb_user",
@@ -21,15 +21,15 @@ class oddb_org::oddb_git(
     provider => gem,
   }
   
-  file { ["$ODDB_HOME/doc", "$ODDB_HOME/data", "$ODDB_HOME/log", "$ODDB_HOME/data/html",
-    "$ODDB_HOME/data/html/fachinfo", "$ODDB_HOME/data/html/fachinfo/de", "$ODDB_HOME/data/html/fachinfo/fr","$ODDB_HOME/data/html/fachinfo/en",
-    "$ODDB_HOME/data/html/patinfo",  "$ODDB_HOME/data/html/patinfo/de",  "$ODDB_HOME/data/html/patinfo/fr","$ODDB_HOME/data/html/patinfo/en",
+  file { ["$oddb_home/doc", "$oddb_home/data", "$oddb_home/log", "$oddb_home/data/html",
+    "$oddb_home/data/html/fachinfo", "$oddb_home/data/html/fachinfo/de", "$oddb_home/data/html/fachinfo/fr","$oddb_home/data/html/fachinfo/en",
+    "$oddb_home/data/html/patinfo",  "$oddb_home/data/html/patinfo/de",  "$oddb_home/data/html/patinfo/fr","$oddb_home/data/html/patinfo/en",
   ]:
     ensure  => directory,
     owner => "$oddb_user",
     group => "apache",
     mode    => 0664, # must be writable for $oddb_user and apache
-    require => Vcsrepo["$ODDB_HOME"],
+    require => Vcsrepo["$oddb_home"],
   }
   package{ 'bundler':  provider => gem, }
    
@@ -55,10 +55,10 @@ class oddb_org::oddb_git(
   exec { "$bundle_oddb_org":
     command => "eselect ruby set ruby19 && git pull && bundle install && touch $bundle_oddb_org",
     creates => "$bundle_oddb_org",
-    cwd => "$ODDB_HOME",
+    cwd => "$oddb_home",
     path => "$path",
     require => [Portage::Package['media-gfx/imagemagick'], [  Package['bundler']],
-    Vcsrepo[$ODDB_HOME],
+    Vcsrepo[$oddb_home],
     
     ],
   }
@@ -80,12 +80,12 @@ class oddb_org::oddb_git(
     creates => $oddb_setup_okay,
     require => [  File[ "$oddb_setup_sh"], 
         Exec["$ruby_installed", "$select_ruby_1_9"],
-        Vcsrepo[$ODDB_HOME], 
+        Vcsrepo[$oddb_home],
         Service['postgresql-8.4'],
     ],
   }
   
-  file { "$ODDB_HOME/src/testenvironment.rb":
+  file { "$oddb_home/src/testenvironment.rb":
     source => "puppet:///modules/oddb_org/testenvironment_rb.txt",
     owner => 'apache',
     group => 'apache',
@@ -93,7 +93,7 @@ class oddb_org::oddb_git(
     require => [Package['apache'], ],
   }
   
-  file { "$ODDB_HOME/etc/db_connection.rb":
+  file { "$oddb_home/etc/db_connection.rb":
     source => "puppet:///modules/oddb_org/db_connection.rb.txt",
     owner => 'apache',
     group => 'apache',
@@ -102,7 +102,7 @@ class oddb_org::oddb_git(
   }
   
   oddb_org::add_service{"ch.oddb":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => '/usr/local/bin/ruby',
     arguments   => 'bin/oddbd',

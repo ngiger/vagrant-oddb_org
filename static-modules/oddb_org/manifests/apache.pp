@@ -93,7 +93,7 @@ class oddb_org::apache(
     owner => 'apache',
     group => 'apache',
     mode  => 0554,
-    require => [Package['apache'], Vcsrepo["$oddb_org::oddb_git::ODDB_HOME"], ],
+    require => [Package['apache'], Vcsrepo["$oddb_org::oddb_git::oddb_home"], ],
   }
    
    
@@ -132,13 +132,33 @@ class oddb_org::apache(
   $key          = 'APACHE2_OPTS'
   $value        = '-D RUBY -D DEFAULT_VHOST -D INFO -D SSL -D SSL_DEFAULT_VHOST -D LANGUAGE'
   
-  file {"$apache2_conf":
+  file {"/etc/apache2/vhosts.d/00_default_ssl_vhost.conf":
     content => "#managed by puppet oddb_org/manifests/apache.pp
-$key=\"$value\"
+<Directory /var/www/oddb.org/doc>
+        Options ExecCGI FollowSymlinks Indexes
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+</Directory>
+<Directory /var/www/oddb.org/data/css>
+        Order allow,deny
+        Allow from all
+</Directory>
+
+<VirtualHost *:80>
+        DocumentRoot /var/www/oddb.org/doc
+        ServerName oddb-ci2.ngiger.dyndns.org
+        DirectoryIndex index.rbx
+        RubyAddPath /var/www/oddb.org/src
+        RubyAddPath /usr/local/lib64/ruby/gems/1.9.1/gems/sbsm-1.2.3/lib
+        RubyRequire 'sbsm/trans_handler'
+        SetHandler ruby-object
+        RubyTransHandler SBSM::FlavoredTransHandler.instance
+        SetEnv DEFAULT_FLAVOR gcc
+</VirtualHost>
 ",
       owner => 'root',
       group => 'root',
       mode => 0644,
   }
-  
 }

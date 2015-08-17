@@ -37,7 +37,7 @@
 #
 class oddb_org(
   $destination        = "/var/www",
-  $ODDB_HOME          = '/var/www/oddb.org',
+  $oddb_home          = '/var/www/oddb.org',
   $pg_base_version    = '8.4.17',
   $pg_server_version  = '8.4.17',
   $apache_version     = '2.2.24',

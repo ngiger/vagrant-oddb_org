@@ -32,7 +32,7 @@ class oddb_org::services(
   }
 
   oddb_org::add_service{"ch.oddb-crawler":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'bin/oddbd crawler',
@@ -41,7 +41,7 @@ class oddb_org::services(
   }
 
   oddb_org::add_service{"ch.oddb-export":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/export/bin/exportd',
@@ -50,7 +50,7 @@ class oddb_org::services(
   }
 
   oddb_org::add_service{"ch.oddb-fiparse":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/fiparse/bin/fiparsed',
@@ -59,7 +59,7 @@ class oddb_org::services(
   }
 
   oddb_org::add_service{"oddb_google_crawler":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'bin/oddbd google_crawler',
@@ -68,7 +68,7 @@ class oddb_org::services(
   }
   
   oddb_org::add_service{"ch.oddb-meddata":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/meddata/bin/meddatad',
@@ -77,7 +77,7 @@ class oddb_org::services(
   }
 
   oddb_org::add_service{"ch.oddb-swissindex_nonpharma":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/swissindex/bin/swissindex_nonpharmad',
@@ -86,7 +86,7 @@ class oddb_org::services(
   }
     
   oddb_org::add_service{"ch.oddb-swissindex_pharma":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/swissindex/bin/swissindex_pharmad',
@@ -95,7 +95,7 @@ class oddb_org::services(
   }
   
   oddb_org::add_service{"ch.oddb-swissreg":
-    working_dir => "$ODDB_HOME",
+    working_dir => "$oddb_home",
     user        => "$oddb_user",
     exec        => $exec_cmd,
     arguments   => 'ext/swissreg/bin/swissregd',
